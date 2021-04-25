@@ -4,3 +4,4 @@
 > - [ORACLE: Consolidated JDK 11 Release Notes](https://www.oracle.com/java/technologies/javase/11all-relnotes.html)
 
 - [New String Methods](./Java11__New_String_Methods.md)
+- [New default method of `Collection` interface: `toArray(java.util.function.IntFunction)`](./Java11__New_default_method_of_Collection_interface-toArray.md)
