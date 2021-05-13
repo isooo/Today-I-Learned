@@ -44,12 +44,12 @@ fun findTheOldest(people: List<Person>) {
 
 // 함수 사용 및 람다로 멤버 참조
 fun findTheOldestLambda(people: List<Person>) {
-    println(people.maxBy(Person::age))
+    println(people.maxByOrNull(Person::age))
 }
 
 // 함수 사용
 fun findTheOldestLambda2(people: List<Person>) {
-    println(people.maxBy { it.age })  
+    println(people.maxByOrNull { it.age })  
 }
 ```
 
@@ -58,18 +58,18 @@ fun findTheOldestLambda2(people: List<Person>) {
 ## 5.1.3 람다 식의 문법
 ```kotlin
 // 코틀린에서 람다는 중괄호 사이에 위치한다
-people.maxBy({ p: Person -> p.age })
-people.maxBy() { p: Person -> p.age }
-people.maxBy { p: Person -> p.age }
-people.maxBy { p -> p.age }
-people.maxBy(Person::age)
+people.maxByOrNull({ p: Person -> p.age })
+people.maxByOrNull() { p: Person -> p.age }
+people.maxByOrNull { p: Person -> p.age }
+people.maxByOrNull { p -> p.age }
+people.maxByOrNull(Person::age)
 ```
    
 - 람다의 파라미터가 하나뿐이고, 그 타입을 컴파일러가 추론 가능한 경우에 `it`을 사용할 수 있다.      
 - 람다를 변수에 저장했을 경우, 파라미터 타입을 추론할 수 없으므로 이럴 땐 파라미터 타입을 명시해야 한다.   
     ```kotlin
     val getAge = {p:Person -> p.age}    
-    people.maxBy(getAge)
+    people.maxByOrNull(getAge)
     ```
 - 이름 붙인 인자를 사용해 람다를 전달할 수 있다.  
     ```kotlin
@@ -191,10 +191,10 @@ people.maxBy(Person::age)
 - `map` 함수는 주어진 람다를 컬렉션의 각 원소에 적용한 결과를 모아 새 컬렉션을 만든다.  
 
 ```kotlin
-list.filter { person -> person.age == list.maxBy { it.age }!!.age }
+list.filter { person -> person.age == list.maxByOrNull { it.age }!!.age }
 
 // 위 코드는 아래와 같이 리펙토링가능  
-val maxAge = list.maxBy { it.age }!!.age
+val maxAge = list.maxByOrNull { it.age }!!.age
 list.filter { person -> person.age == maxAge }
 ```
 
