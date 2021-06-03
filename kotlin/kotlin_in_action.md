@@ -7,3 +7,5 @@
 - [CH5. 람다로 프로그래밍](./kotlin_in_action__CH5__Programming_with_lambdas.md)
 - [CH6. 코틀린 타입 시스템](./kotlin_in_action__CH6__The_Kotlin_type_system.md)
 - [CH7. 연산자 오버로딩과 기타 관례](./kotlin_in_action__CH7__Operator_overloading_and_other_conventions.md)
+- [CH8. 고차 함수: 파라미터와 반환 값으로 람다 사용](./kotlin_in_action__CH8__Higher-order_functions__lambdas_as_parameters_and_return_values.md)
+- [CH9. 제네릭스](./kotlin_in_action__CH9__Generics.md)
