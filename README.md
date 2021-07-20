@@ -2,6 +2,11 @@
 
 <br/>
 
+## ide
+- [intellij에서 DataSource 공유하기](./ide/intellij__share_datasource_in_dategrip.md)
+
+<br/>
+
 ## java
 - [Java 9에 추가된 feature를 알아보자.](./java/Java9.md)
 - [Java 11에 추가된 feature를 알아보자.](./java/Java11.md)
