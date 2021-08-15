@@ -5,3 +5,4 @@
 # modern java in action
 - [CH2. 동작 파라미터화 코드 전달하기](./modern_java_in_action__CH2__Passing_code_with_behavior_parameterization.md)   
 - [CH3. 람다 표현식](./modern_java_in_action__CH3__Lambda_expressions.md)
+- [CH4. 스트림 소개](./modern_java_in_action__CH4__Introducing_streams.md)
