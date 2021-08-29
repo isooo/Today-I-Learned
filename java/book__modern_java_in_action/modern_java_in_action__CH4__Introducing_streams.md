@@ -81,7 +81,7 @@ final List<String> lowCaloricDishesName = menu.parallelStream()
         .collect(Collectors.toList());
 ```
     
-> *병렬처리에 대한 내용(`parallelStream()`)은 추후 책 CH7에서 다룰 예정*    
+> *병렬처리에 대한 내용(`parallelStream()`)은 추후 [책 CH7](./modern_java_in_action__CH7__Parallel_data_processing_and_performance.md#71-병렬-스트림)에서 다룰 예정*    
     
 <br/>  
   

@@ -8,3 +8,4 @@
 - [CH4. 스트림 소개](./modern_java_in_action__CH4__Introducing_streams.md)
 - [CH5. 스트림 활용](./modern_java_in_action__CH5__Working_with_streams.md)
 - [CH6. 스트림으로 데이터 수집](./modern_java_in_action__CH6__Collecting_data_with_streams.md)
+- [CH7. 병렬 데이터 처리와 성능](./modern_java_in_action__CH7__Parallel_data_processing_and_performance.md)
