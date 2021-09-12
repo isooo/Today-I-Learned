@@ -1,4 +1,4 @@
-# **CH5 스트림 활용**
+# **CH5. 스트림 활용**
 
 <details>
 <summary>참고: 사용될 예제 코드</summary>
