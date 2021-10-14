@@ -7,12 +7,12 @@
 <br/>
 
 ## 1
-![](./img/intellij__share_datasource_in_dategrip__01.png)
+![](./img/intellij__share_datasource_in_datagrip__01.png)
 
 <br/>
 
 ## 2
-![](./img/intellij__share_datasource_in_dategrip__02.png)
+![](./img/intellij__share_datasource_in_datagrip__02.png)
 
 원하는 데이터 소스를 클릭한 후(1), 2버튼을 누르면 된다.  
 그럼 해당 데이터 소스는 Global Data Sources로 등록되어, 다른 프로젝트에서도 접근할 수 있다.

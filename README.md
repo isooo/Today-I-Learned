@@ -3,7 +3,7 @@
 <br/>
 
 ## ide
-- [intellij에서 DataSource 공유하기](./ide/intellij__share_datasource_in_dategrip.md)
+- [intellij에서 DataSource 공유하기](./ide/intellij__share_datasource_in_datagrip.md)
 
 <br/>
 
