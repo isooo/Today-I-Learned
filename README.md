@@ -2,6 +2,11 @@
 
 <br/>
 
+## elasticsearch
+- [Elasticsearch의 검색 API](./elasticsearch/search_api.md)
+
+<br/>
+
 ## ide
 - [IntelliJ에서 DataSource 공유하기](./ide/intellij__share_datasource_in_datagrip.md)
 - [IntelliJ 화면 배경 색상 변경하기](./ide/intellij__background_color_setting.md)
