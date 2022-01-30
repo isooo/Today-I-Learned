@@ -19,5 +19,10 @@
 
 <br/>
 
+## linux
+- [cli 명령어](./linux/cmd.md)
+
+<br/>
+
 ## window
 - [cli 명령어](./window/cmd.md)
