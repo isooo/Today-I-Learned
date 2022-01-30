@@ -1,4 +1,4 @@
-# **intellij에서 DataSource 공유하기**
+# IntelliJ에서 DataSource 공유하기
 
 > dbtool로 [DataGrip](https://www.jetbrains.com/datagrip/?gclid=EAIaIQobChMI9LCA9-Hx8QIVQXZgCh2rzw97EAAYASAAEgJfdfD_BwE)을 사용하고 있던 와중, 인텔리제이가 버벅거려 `invalidate caches > clear file system cache and local history`로 restart를 했더니... 기존에 세팅해두었던 커넥션이 모두 날아가버렸다 ㅠ_ㅜ  
 세팅해둔 정보는 프로젝트 내 `.idea`에 저장되어 있었던 것.    
@@ -28,5 +28,5 @@
 
 <br/><br/>
 
-## **참고**
+## 참고
 - [JetBrains News:: IntelliJ 기반의 IDE 에서 Data 소스를 쉽게 공유하세요](https://blog.jetbrains.com/ko/2018/05/24/intellij-ide-data/)
