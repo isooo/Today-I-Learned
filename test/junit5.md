@@ -8,7 +8,7 @@
 > - `@ParameterizedTest`가 붙은 메서드에 파라미터 스트림을 전달하는 역할
 > - `ArgumentsProvider` 인터페이스를 구현하면 커스텀한 provider를 만들 수 있다
 >   - 커스텀 provider를 애너테이션 기반으로 사용하고 싶다면, [`@ArgumentsSource`](https://junit.org/junit5/docs/current/api/org.junit.jupiter.params/org/junit/jupiter/params/provider/ArgumentsSource.html)을 이용해 해당 provider를 등록하면 된다
-> - e.g. `@ValueSource`, `@NullSource`, `@CsvSource`, `@EnumSource`, `@MethodSource`
+> - e.g. `@ValueSource`, `@NullSource`, `@CsvSource`, `@EnumSource`, `@MethodSource`, `@EmptySource`
 
 <br/>
 
@@ -57,4 +57,36 @@ class Test {
 <br/>
 
 ## :large_orange_diamond: `@EmptySource`
-*TBD...*
+`@ParameterizedTest`가 붙은 메서드의 파라미터가 1개 일 때, 이 파라미터의 값으로 empty value를 제공하는 역할
+
+- 지원하는 타입
+    - `String`
+    - `java.util.List`
+    - `java.util.Set`
+    - `java.util.Map`
+    - primitive arrays  
+        - e.g. `int[]`, `char[][]`, etc.
+    - object arrays 
+        - e.g. `String[]`, `Integer[][]`, etc.
+
+> :warning: 위 타입들의 subtype은 지원하지 **않음**
+> - e.g. `HashSet`, `SortedSet`, `TreeSet`, `HashMap`, `LinkedHashMap` 등은 지원하지 않음. 
+>   - 사용 시, `org.junit.platform.commons.PreconditionViolationException .... [xxx] is not a supported type` 예외 발생  
+
+<br/>
+
+### :small_blue_diamond: 사용 예시
+```kotlin
+@ParameterizedTest
+@EmptySource
+fun emptyStringTest(emptyString: String) {
+    assertThat(emptyString).isEmpty()
+}
+
+@ParameterizedTest
+@EmptySource
+fun emptySetTest(emptySet: Set<String>) {
+    assertThat(emptySet).isEmpty()
+    assertThat(emptySet.size).isZero
+}
+```
