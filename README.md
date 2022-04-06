@@ -2,6 +2,11 @@
 
 <br/>
 
+## database
+- [redis란](./database/redis.md)
+
+<br/>
+
 ## elasticsearch
 - [Elasticsearch의 검색 API](./elasticsearch/search_api.md)
 - [Elasticsearch의 aggregation](./elasticsearch/aggregation.md)
