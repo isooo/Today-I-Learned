@@ -45,6 +45,7 @@
 
 ## spring
 - [Bean scopes](./spring/bean_scope.md)
+- ['토비의 스프링'을 읽고 정리하자.](./spring/book__toby_spring/README.md)
 
 <br/>
 
