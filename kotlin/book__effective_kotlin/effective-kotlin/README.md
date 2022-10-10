@@ -47,3 +47,83 @@
 ### 변경 가능 지점 노출하지 말기
 - mutable 객체는 외부에 노출하지 말자
     - `item1.MutatingPoint.kt` 참고
+
+## :small_blue_diamond: 아이템 2: 변수의 스코프를 최소화하라
+- 프로퍼티보단 지역 변수를 사용하자
+- 최대한 좁은 스코프를 갖게 변수를 사용하자
+    - 특정 블록 내에서만 사용된다면, 그 블록 내에서 변수를 선언하자
+    - 좁은 스코프에 걸쳐 있을수록 값 변경 등을 추적하기가 쉽기 때문
+- 여러 프로퍼티를 한꺼번에 설정해야 하는 경우엔 [구조분해 선언<sub>destructuring declaration</sub>](https://github.com/isooo/Today-I-Learned/blob/564dd09dd47852b5c2998cfbf5c76dd69555af34/kotlin/book__kotlin_in_action/kotlin_in_action__CH7__Operator_overloading_and_other_conventions.md#74-%EA%B5%AC%EC%A1%B0-%EB%B6%84%ED%95%B4-%EC%84%A0%EC%96%B8%EA%B3%BC-component-%ED%95%A8%EC%88%98)을 활용하자
+    - `item2.DestructuringDeclarationEx.kt` 참고 
+
+### 캡쳐링
+- 람다에선 변수를 캡처한다는 것을 기억하자
+    - `item2.Capturing.kt` 참고
+
+## :small_blue_diamond: 아이템 3: 최대한 플랫폼 타입을 사용하지 말라
+> - 플랫폼 타입<sub>platform type</sub>
+>     - 코틀린이 아닌 다른 프로그래밍 언어에서 전달되어 null 여부를 알 수 없는 타입
+
+- 플랫폼 타입은 안전하지 않으니 최대한 빠르게 제거하자 
+    - e.g. 아래와 같은 java코드가 있을 때
+        ```java
+        // java
+        public class JavaClass {
+            public String getValue() {
+                return null;
+            }
+        }
+        ```
+    - 위 자바 코드를 코틀린에서 사용하고자 한다면, 아래와 같은 상황이 발생할 수 있다
+        ```kotlin
+        fun statedType() {
+            val value: String = JavaClass().value // NPE
+            println(value.length)
+        }
+
+        fun platformType() {
+            val value = JavaClass().value
+            println(value.length) // NPE
+        }
+        ```
+        - 문제는 NPE 발생 위치. `statedType()`의 경우가 훨씬 에러를 파악하기 쉽다 
+
+## :small_blue_diamond: 아이템 4: inferred 타입으로 리턴하지 말라
+> 코틀린의 타입 추론<sub>type inference</sub>은 유용한 기능이지만...  
+
+- 타입을 확실하게 지정해야 하는 경우엔 명시적으로 타입을 지정하자
+- 특별한 이유나 확실한 확인 없이는 타입을 제거하지 말자
+
+## :small_blue_diamond: 아이템 5: 예외를 활용해 코드에 제한을 걸어라
+- 코틀린에는 코드의 동작에 제한을 거는 기능이 제공된다
+    - 예상치 못한 동작을 방지할 수 있음
+    - 코드를 어느 정도 자체적으로 검사할 수 있어서, 관련된 단위 테스트를 줄일 수 있다는 장점
+    - 스마트 캐스트를 활용하여, 캐스트를 적게할 수 있음
+
+### `require` 블록
+> argument를 제한할 수 있다
+
+- 함수를 정의할 때 타입 시스템을 활용해 argument에 제한을 걸 수 있다
+- 제한을 만족하지 못할 경우, 예외를 throw한다
+    - `throw IllegalArgumentException`
+- `item5.ArgumentEx.kt` 참고
+
+### `check` 블록
+> 상태과 관련된 동작을 제한할 수 있다
+
+- 구체적 조건을 만족할 때만 함수를 사용할 수 있음
+    - e.g. 객체가 초기화되어 있을 때만 처리하고자 할 때, 사용자가 로그인했을 때만 처리하고자 할 때 등등
+- `require`와 비슷하지만, 지정된 예측을 만족하지 못하면 `throw IllegalStateException`한다는 점이 다름
+- `item5.StatusEx.kt` 참고
+
+### `assert` 블록
+> 어떤 것이 true인지 확인할 수 있다. (테스트 모드에서만 작동함)
+
+- 구현한 내용이 확실한 지 확인하고자 할 때 사용
+- 주로 단위 테스트 구현의 정확성을 확인할 때 사용됨
+    - e.g. `assertEquals()`...
+- 만족하지 않는다고 해서 예외를 던지지는 않음
+
+### `return` 또는 `throw`와 함께 활용하는 elvis 연산자
+- throw나 return을 엘비스 연산자 오른쪽에 두는 방식으로 구현하면, 읽기 쉽고 유연한 코드를 짤 수 있다
+- `item5.SmartCastingEx.kt` 참고
