@@ -35,6 +35,7 @@
 ## kotlin
 - ['코틀린 인 액션'을 읽고 정리하자.](./kotlin/book__kotlin_in_action/README.md)
 - [Jackson annotation](./kotlin/jackson_annotation.md)
+- ['이펙티브 코틀린'을 읽고 정리하자](./kotlin/book__effective_kotlin/effective-kotlin/README.md)
 
 <br/>
 
