@@ -522,3 +522,94 @@ val data = getSomeData() // data의 타입이 뭔지 알려면 함수를 확인�
         }
         ```
 - 리시버를 변경해야 할 경우, 명시적 리시버를 사용하면 함수의 출처를 명확히 알 수 있기 때문에 가독성을 증가시킬 수 있다
+
+## :small_blue_diamond: Item 16: Properties should represent a state, not a behavior
+- 코틀린의 프로퍼티는 자바의 필드와 비슷하게 생겼지만, 개념이 다르다
+    - 둘 다 데이터를 보관할 수 있지만
+    - 프로퍼티에는 더 많은 기능이 있다
+        - 커스텀 setter/getter
+            ```kotlin
+            var name: String? = null
+                get() = field?.uppercase()
+                set(value) {
+                    if (!value.isNullOrBlank()) {
+                        field = value
+                    }
+                }
+            ```        
+            - 이 예시에서 보면 `field`라는 백킹 필드<sub>backing field</sub>를 이용하고 있다. 이는 `name`을 지칭한다
+- 프로퍼티는 필드보단 접근자의 개념으로 보자
+    - 위임 속성을 사용할 수 있다 ( `item 21`에서 더 다룰 예정)
+- 하지만 과도한 동작을 포함시키진 말자
+    - 무거운 동작이 반복적으로 실행되기 때문에, 이 경우엔 함수로 추출되어야 한다
+
+## :small_blue_diamond: Item 17: Consider naming arguments
+인수 이름을 잘 지어주자
+- 인수 이름을 활용하면 휴먼 에러를 방지할 수 있다
+    - 인수가 n개 이상일 경우, 잘못된 위치에 인수를 전달할 확률이 낮아짐 
+    - 동일한 타입의 인수가 여러 개 있을 때, 인수 이름을 이용해 헷갈림 방지 가능
+
+## :small_blue_diamond: Item 18: Respect coding conventions
+컨벤션 잘 지키자. 코틀린 뿐만 아니라!
+- 프로젝트의 코드는 여러 사람이 아닌 한 사람이 작성한 것처럼 작성되어야 한다
+
+## :small_blue_diamond: Item 19: Do not repeat knowledge
+재사용성의 중요성
+- 비슷한 로직으로 구현되어 있다고 하더라도, 서로 다른 곳(actor)에서 사용된다면 하나의 로직으로 처리하지 말라
+    - 그들은 서로 독립적으로 변경할 가능성이 크기 때문
+- 재사용되어선 안되는 부분을 재사용하려는 유혹을 참아내자...
+- 물론 DRY<sub>don't repeat yourself</sub>이긴 하지만, 균형을 잘 지켜서 개발하자 
+
+프로그램의 주요 지식 2가지
+- logic, common algorithem
+
+Single responsibility principle<sub>srp</sub>
+- solid에서 단일 책임 원칙
+- 클래스가 변경되는 이유는 하나여야 한다
+    - 둘 이상의 이유로 하나의 클래스가 변경되선 안된다 
+
+## :small_blue_diamond: Item 20: Do not repeat common algorithms
+비즈니스 로직을 포함하지 않고 별도 모듈/라이브러리로 추출할 수 있는 패턴은 일반적인 동작을 한다. 이들을 반복적으로 구현하진 말자
+- 어디선가 한 번 사용되면 최적화되어, 다른 사용처에서도 이 이득을 누릴 수 있음
+- 명명해두면 나중에 이름만 보고도 기능을 이해할 수 있어 시간 절약됨  
+
+stdlib<sub>standard library</sub>를 항상 살펴보자!  
+- 만약 stdlib에 없는 알고리즘이 필요하다면, 프로젝트에서 정의하되 extension function을 활용하자 
+    - 구체적인 타입이 있는 개체에서만 사용하도록 제한할 수 있어 좋음
+    - 수정할 객체를 인수로 받는 것보다, 확장 리시버로 사용하는게 더 가독성에 좋음
+    - 일반 함수보다 찾기 쉬움(자ㅏ동 완성을 빨리 할 수 있)
+
+## :small_blue_diamond: Item 21: Use property delegation to extract common property patterns
+- 프로퍼티 패턴을 추출하는 방법에 프로퍼티 위임이 사용된다 
+- 프로퍼티 위임은 프로퍼티의 일반적 행위를 추출해 재사용할 수 있게 한다
+    - 프로퍼티와 관련된 다양한 조작 가능 
+- 위임은 단지 반복 패턴을 줄이기 위해서가 아니라 observable 속성도 갖고 있다 
+- lazy, observable 용도 외에도 다른 패턴도 존재한다 
+    - lazy
+        - 첫 사용 요청이 들어왔을 때 초기화되는 패턴
+    - observable
+        - 프로퍼티 값에 변경이 있을 때마다 이를 감지하는 패턴
+    - vetoable
+    - notNull
+    - 이 외에도 직접 프로퍼티 위임을 만들어 사용할 수도 있다 
+
+> *책엔 안드로이드 예시가 많이 나옴...* 
+
+## :small_blue_diamond: Item 22: Use generics when implementing common algorithms
+타입 파라미터는 컴파일 타이에 타입을 확인하고 올바르게 추론할 수 있어 더욱 안전한 프로그래밍을 할 수 있다  
+
+> - 제네릭은 일반적으로 JVM 바이트 코드 제한으로 인해, 컴파일 중에 지워지기 때문에 런타임에 그다지 유용하지 않음
+>   - `reified` 타입만 안 지워짐
+
+타입 파라미터는 구체적인<sub>concrete</sub> 타입의 서브타입만 사용하도록 타입을 제한할 수 있다
+- 이렇게 하면 이 concrete 타입이 제공하는 함수를 안전하게 사용할 수 있다
+
+## :small_blue_diamond: Item 23: Avoid shadowing type parameters
+동일한 이름으로 클래스 프로퍼티와 함수 파라미터를 정의할 경우, 함수 파라미터가 외부 스코프인 프로퍼티를 가리는 상황이 발생한다. 이를 섀도잉<sub>shadowing</sub> 이라 한다.  
+```kotlin
+class Forest(val name: String) {
+    fun addTree(name: String) { ... }
+}
+```
+
+섀도잉이 발생할 수 있는 상황을 만들지 말자.  
