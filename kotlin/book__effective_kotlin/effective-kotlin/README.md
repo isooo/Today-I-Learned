@@ -613,3 +613,240 @@ class Forest(val name: String) {
 ```
 
 섀도잉이 발생할 수 있는 상황을 만들지 말자.  
+
+## :small_blue_diamond: Item 24: Consider variance for generic types
+예시
+- `class Cup<T>` 
+    - 타입 파라미터 `T`에 variance modifier<sub>`in`, `out`</sub>가 안 붙어 있다면, 기본적으로 이는 invariant이라는 뜻
+    - `T` 타입 간에 어떤 관계가 있다 하더라도, 이 제네릭 클래스에서는 아무 관계가 없다는 뜻
+    - e.g. 
+        ```kotlin
+        // 아래 코드 전부 컴파일 에러 발생: Type mismatch
+
+        val anys: Cup<Any> = Cup<Int>()
+        val numbers: Cup<Number> = Cup<Int>()
+        val nothings: Cup<Any> = Cup<Nothing>()
+        val ints: Cup<Nothing> = Cup<Int>()
+        ```            
+        - `Cup<Int>`, `Cup<Number>`
+        - `Cup<Any>`, `Cup<Nothing>`
+
+variance modifiers            
+- `out`, `in` variance modifiers를 사용하면 관계를 만들 수 있다
+- `out`
+    - 해당 타입 파라미터를 covariant<sub>공변</sub>로 만든다
+    - `A is B` 관계에서 `Cup`의 타입 파라미터에 `out` 을 붙여 `Cup`이 covariant로 만든다면
+        - `Cup<A> is a subtype of Cup<B>`가 되는 것이다
+        ```kotlin
+        class Cup<out T>
+
+        fun main() {
+            val anys: Cup<Any> = Cup<Int>() // 정상 동작
+            val numbers: Cup<Number> = Cup<Int>() // 정상 동작
+            val nothings: Cup<Any> = Cup<Nothing>() // 정상 동작
+            // val ints: Cup<Nothing> = Cup<Int>() // 컴파일 에러 발생
+
+            val b: Cup<Dog> = Cup<Puppy>() // 정상 동작
+            // val a: Cup<Puppy> = Cup<Dog>() // 컴파일 에러 발생
+        }
+
+        open class Dog
+        class Puppy: Dog()
+        ```
+- `in`
+    - 해당 타입 파라미터를 contravariant<sub>반공변</sub>로 만든다
+    - `A is B` 관계에서 `Cup`의 타입 파라미터에 `in` 을 붙여 `Cup`이 contravariant로 만든다면
+        - `Cup<A> is a supertype of Cup<B>`가 되는 것이다
+        ```kotlin
+        class Cup<in T>
+
+        fun main() {
+            // val anys: Cup<Any> = Cup<Int>() // 컴파일 에러 발생
+            // val numbers: Cup<Number> = Cup<Int>() // 컴파일 에러 발생
+            // val nothings: Cup<Any> = Cup<Nothing>() // 컴파일 에러 발생
+            val ints: Cup<Nothing> = Cup<Int>() // 정상 동작
+
+            // val b: Cup<Dog> = Cup<Puppy>() // 컴파일 에러 발생
+            val a: Cup<Puppy> = Cup<Dog>() // 정상 동작
+        }
+
+        open class Dog
+        class Puppy: Dog()
+        ```
+        
+> | variance<br/>modifier | example |
+> |--|--|
+> | | Int -> Number|
+> | invariant<br/>`class Box<T>` | `Box<Int>` --  `Box<Number>` |
+> | covariant<br/>`class Box<out T>` | `Box<Int>` -> `Box<Number>` |
+> | contravariant<br/>`class Box<in T>` | `Box<Int>` <- `Box<Number>` |
+
+Function types
+- 아래 고차 함수의 인자로 `(Int) -> Number`, `(Number) -> Int`, `(Any) -> Number` 등의 타입이 가능하다
+    ```kotlin
+    fun printProcessedNumber(transition: (Int) -> Any) {
+        println(transition(42))
+    }
+    ```
+    > - 자세한 예시는 `item24.FunctionType.kt` 참고
+    - 이게 가능한 이유는 다음과 같은 관계가 있기 때문
+        - `(Int) -> Any` <-- `(Int) -> Number`, `(Number) -> Any` <-- `(Number) -> Number` <-- `(Any) -> Number`, `(Number) -> Int`
+            - 계층 구조에서 아래로 내려갈수록 파라미터 타입은 더 상위 타입으로, 리턴 타입은 더 하위 타입으로 흘러간다
+        - 이러한 계층 구조를 가지게 된 것은
+            - 코틀린의 함수 타입에서   
+            모든 파라미터 타입은 `in` variance modifier인 contravariant이고,  
+            모든 반환 타입은 `out` variance modifier인 covariant이기 때문  
+                - e.g. `(T1, T2) -> T3`
+                    - `T1`, `T2`는 contravariant
+                    - `T3`은 covariant
+  
+The safety of variance modifiers
+- java에서 `array`는 covariant다. <sub>이렇게 된 이유는 모든 타입의 배열에서 일반적인 operation이 동작하게 하기 위함이었다고 추측,,</sub>
+    ```java
+    Integer[] numbers = {1, 4, 2, 1};
+    Object[] objects = numbers;
+    objects[2] = "B"; // Runtime error: ArrayStoreException (not compile time error)
+    ```
+    - `numbers`가 `Object[]`타입 변수에 담겼지만, 내부 구조는 여전히 `Integer` 배열인 상태다. 그래서 `String`타입의 값을 `objects`의 요소로 넣으려고 하면 에러가 발생하는 것이다.   
+        - 빌드된 클래스 파일 열어보면   
+            ```java
+            Integer[] numbers = new Integer[]{1, 4, 2, 1};
+            numbers[2] = "B";        
+            ```
+    - 이러한 <sub>자바의 결함</sub> 상황을 방지하기 위해 코틀린에선 `Array`<sub>`IntArray`, `CharArray` etc.</sub>를 invariant로 만든 것이다. 
+        - `Array<Int>`를 `Array<Any>`로 업캐스팅할 수 없음! 
+        ```kotlin
+        val intArray = arrayOf<Int>()
+        val anyArray: Array<Any> = intArray // compile error: type mismatch
+        ```
+- public in-position에 covariant 타입 파라미터<sub>`out` modifier</sub>는 금지 (안전하지 못하기 때문)
+    ```kotlin
+    fun main() {
+        val puppyBox = Box<Puppy>()
+        val dogBox1: Box<Dog> = puppyBox
+        dogBox1.set(Hound()) // But I have a place for a Puppy
+
+        val dogBox2 = Box<Dog>()
+        val anyBox: Box<Any> = dogBox2
+        anyBox.set("Some string") // But I have a place for a Dog
+        anyBox.set(42) // But I have a place for a Dog
+    }
+
+    open class Dog
+    class Puppy: Dog()
+    class Hound: Dog()
+
+    class Box<out T> {
+        private var value: T? = null
+
+        // illegal in kotlin (예시를 위함... ㅠㅠ)
+        fun set(value: @UnsafeVariance T) {
+            this.value = value
+        }
+
+        fun get(): T = value ?: error("Value not set")
+    }
+    ```
+    - 위 예시는 `Box<out T>`라 선언했고, `puppyBox`에 `Hound`를 담거나 `dogBox2`에 `Int` 등 다른 타입을 담을 수 있게 되는 상황이다. 예기치 못한 에러가 발생할 수 있는 상황!  
+    - 그렇기 때문에 kotlin은 public in position에서, `out` modifier를 사용한 covariant를 금지한다
+        - 위 경우에선 `Box#set()`을 private으로 선언하여 오브젝트를 업캐스트하는데 covariance를 쓸 수 없도록 만드는 방식으로 해결할 수도 있다  
+    - `MutableList`는 invariant다. 그래서 `T`를 in position에 사용해도 안전하다
+        ```kotlin
+        fun main() {
+            val list = mutableListOf("a", "b", "c")
+            append(list) // compile error: type mismatch
+        }
+
+        fun append(list: MutableList<Any>) {
+            list.add(42)
+        }
+        ```
+        - invariant이기 때문에 `append` 함수에는 `MutableList<Any>` 타입만 들어올 수 있음!  
+- public out-position에 covariant 타입 파라미터<sub>`out` modifier</sub>는 충분히 가능
+    - e.g. 생상자나 immutable data holders에 주로 사용됨 
+    - `List`는 covariant다. 그래서 `List<Any?>`를 기대하는 곳에 `List<Int>`를 넣을 수 있다. 
+        ```kotlin
+        fun main() {
+            val list = listOf(1, 2, 3)
+            append(list)
+        }
+
+        fun execute(list: List<Any?>) {
+            // do somthing
+        }
+        ```
+        - 이때 `List`는 immutable하기 때문에 covariant여도 앞서 'in position에 out modifier를 사용하게 될 경우 발생할 수 있는 에러' 상황이 발생하지 않을 뿐더러, 아래 예시처럼 `execute`내에서 <sub>파라미터로 들어온 어떤 타입이든</sub> `List`내 함수를 자유롭게 적용할 수 있는 것이다
+- public out-position에 contravariant 타입 파라미터는 금지
+    - 단, 아래와 같이 private으로 선언하는건 가능
+        ```kotlin
+        class Box<in T> {
+            private var value: T? = null
+
+            fun set(value: T) {
+                this.value = value
+            }
+
+            private fun get(): T = value ?: error("Value not set") 
+        }
+        ```
+        - `get`이 private이 아니라면 compile error 발생
+            - `Type parameter T is declared as 'in' but occurs in 'out' position in type T`
+                - `T`는 `in`으로 선언되있는데, 공개적이면 `out`처럼 사용되는거니, 리턴 타입에 `@UnsafeVariance`를 붙여 명시적으로 표기하거나 아니면 `in`을 제거하라고 뜸
+    - `in` modifier를 public in-position에 알맞게 쓴 예시: `kotlin.coroutines.Continuation`과 `resumeWith()`
+
+Variance modifier positions
+- variance modifier 사용 위치는 2가지가 있다
+    - 선언자<sub>declaration-side</sub> 위치
+        ```kotlin
+        class Box<out T>(val value: T)
+
+        fun main() {
+            val boxStr: Box<String> = Box("Str")
+            val boxAny: Box<Any> = boxStr
+        }
+        ```
+    - 사용<sub>use-site</sub> 위치
+        ```kotlin
+        class Box<T>(val value: T)
+
+        fun main() {
+            val boxStr: Box<String> = Box("Str")
+            val boxAny: Box<out Any> = boxStr
+        }        
+        ```
+        - 이 방법을 적용할 수 없는 인스턴스도 존재한다
+        - 주로 하나의 변수에 대해 적용하고자 할 때 사용한다
+            ```kotlin
+            interface Dog
+            interface Cutie
+            data class Puppy(val name: String) : Dog, Cutie
+            data class Hound(val name: String) : Dog
+            data class Cat(val name: String) : Cutie
+
+            fun fillWithPuppies(list: MutableList<in Puppy>) { // Dog, Cutie 타입이 허용됨
+                list.add(Puppy("Jim"))
+                list.add(Puppy("Beam"))
+            }
+
+            fun main() {
+                val dogs = mutableListOf<Dog>(Hound("Pluto")) // Dog로 채우길 원함
+                fillWithPuppies(dogs)
+                println(dogs) // [Hound(name=Pluto), Puppy(name=Jim), Puppy(name=Beam)]
+
+                val animals = mutableListOf<Cutie>(Cat("Felix")) // Cutie로 채우기 위함 
+                fillWithPuppies(animals) // [Cat(name=Felix), Puppy(name=Jim), Puppy(name=Beam)]
+                println(animals)
+            }
+            ```        
+
+#### :heavy_check_mark: 정리
+- `Cup<T>`에서 타입 파라미터 `T`는 invariant
+    - `A is a subtype of B`일 때, `Cup<A>`와 `Cup<B>`는 아무 관계도 없다
+- `Cup<out T>`에서 타입 파라미터 `T`는 covariant
+    - `A is a subtype of B`일 때, `Cup<A> is a subtype of Cup<B>`가 된다
+    - covariant type은 out-position에 쓸 수 있다 <sub>e.g. `get()`</sub>
+- `Cup<in T>`에서 타입 파라미터 `T`는 contravariant
+    - `A is a subtype of B`일 때, `Cup<B> is a subtype of Cup<A>`가 된다
+    - contravariant type은 in-position에 쓸 수 있다 <sub>e.g. `set()`</sub>
+  
+> `out`은 only read, `in`은 only modify  
