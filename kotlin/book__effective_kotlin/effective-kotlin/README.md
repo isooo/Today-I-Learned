@@ -1353,3 +1353,202 @@ When should we use DSLs?
 > boilerplate code
 > - Repeatable code that does not contain any important information for a reader.
 
+<br/>
+
+## :small_blue_diamond: Item 36: Prefer composition over inheritance
+- 상속<sub>inheritance</sub>은 `is a` 관계인 객체의 계층 구조를 생성하도록 설계되었다
+    - 슈퍼 클래스용으로 작성된 TC는, 해당 서브 클래스들로도 모두 통과해야 한다 == LSP<sub>Liskov Substitution Principle</sub> 
+- 만약 단순히 코드 추출이나 재사용이 필요하다면, 상속보단 합성<sub>composition</sub>을 사용하자
+    - Composition is more secure
+        - 클래스 구현 방식까지 알 필요 없고, 외부에 보이는 행위에만 의존하면 된다
+    - Composition is more flexible
+        - 상속은 1개밖에 못하지만, composition은 1개 이상도 가능하다
+        - 상속을 한다면 우리는 슈퍼 클래스의 모든 것을 가지게 되지만, composition은 내가 필요한 것만 취하면 된다
+            - 상속의 경우, 슈퍼 클래스가 변동되면 이의 모든 서브 클래스들이 영향을 받게 된다 
+                - 특정 서브 클래스만 영향받도록 하기 어려운 구조!
+    - Composition is more explicit
+        - 상속을 이용한다면 슈퍼 클래스의 메서드를 내 클래스 내 정의된 메서드처럼 사용할 수 있지만, 누군가 봤을 때 이 메서드 출처가 내껀지 슈퍼껀지 extension인지 알기 어려움
+        - composition은 메서드 출처를 알기 쉬움
+    - Composition is more demanding
+        - 상속은 슈퍼 클래스에 기능을 추가하면 하위 클래스에서도 쓸 수 있음. 하지만 composition은 직접 조정해 줘야 한다 .. ?
+    - Inheritance gives us strong polymorphic behavior
+        - 슈퍼클래스는 계약을 정의하고, 서브클래스는 이를 respect 한다
+            - e.g. Dog을 Animal로 treat할 수 있는 건 편리하지만, 그만큼 행동에 제약을 가져다준다. Animal의 모든 서브 클래스들은 Animal의 모든 행동과 일치해야 하기 때문이다
+- e.g. 상속을 이용한 방법
+    ```kotlin
+    class ProfileLoader {
+        fun load () {
+            // show progress bar
+            // load profile
+            // hide progress bar
+        }
+    }
+
+    class ImageLoader {
+        fun load () {
+            // show progress bar
+            // load image
+            // hide progress bar
+        }
+    }
+    ```
+    - 위 코드를 리팩터링한다면, 아래와 같이 추상 클래스에 공통 로직을 모아두는 방식으로 해결할 수도 있다
+    ```kotlin
+    abstract class LoaderWithProgressBar {
+        fun load () {
+            // show progress bar
+            action()
+            // hide progress bar
+        }
+
+        abstract fun action()
+    }
+
+    class ProfileLoader2 : LoaderWithProgressBar() {
+        override fun action() {
+            // load profile
+        }
+    }
+    class ImageLoader2 : LoaderWithProgressBar() {
+        override fun action() {
+            // load profile
+        }
+    }
+    ```
+    - 하지만 이 접근 방식은 몇 가지 단점이 있다
+        - 오직 하나의 클래스만 확장 가능
+            - 상속을 사용하여 기능을 추출하면, 계층이 지나치게 복잡해지거나 많은 기능이 축적된 거대한 BaseXXX 클래스가 탄생할 수도 있다
+        - 확장 시, 슈퍼 클래스의 모든 것을 가져와야 함
+            - 필요치 않는 '정보와 기능'을 가진 클래스가 돼버릴 수 있다(ISP<sub>interface segregation principle</sub> 위반)
+                - e.g. 
+                    ```kotlin
+                    // Dog라는 추상 클래스가 있다
+                    abstract class Dog {
+                        open fun bark() {/* ... */ }
+                        open fun sniff() {/* ... */ }
+                    }
+                    ```
+                    ```kotlin
+                    // RobotDog은 sniff기능이 필요없어서 아래와 같이 구현했다면?
+                    class RobotDog : Dog() {
+                        override fun sniff() {
+                            throw Error("Operation not supported")
+                        }
+                    }
+                    ```                
+                    - `RobotDog`은 필요하지 않은 메서드를 가지고 있으므로 ISP를 위반하고,  
+                    상위 슈퍼 클래스의 동작을 지원하지 않게 구현했기 때문에 LSP도 위반했다
+                    > - 상속 대신 composition을 이용하면, 우리가 원하는 재사용 항목만 선택할 수 있다     
+        - 슈퍼 클래스의 기능을 확장하는 것은 덜 명시적임 
+            - 메서드 동작을 알기 위해 슈퍼 클래스까지 따라가야하는 불필요한 일은 리소스 낭비,,,
+- e.g. composition을 이용한 방법
+    ```kotlin
+    class ProgressBar {
+        fun show() { /* show progress bar */ }
+        fun hide() { /* hide progress bar */ }
+    }
+
+    class ProfileLoader3 {
+        val progressBar = ProgressBar()
+        fun load() {
+            progressBar.show()
+            // load profile
+            progressBar.hide()
+        }
+    }
+    class ImageLoader3 {
+        val progressBar = ProgressBar()
+        fun load() {
+            progressBar.show()
+            // load image
+            progressBar.hide()
+        }
+    }
+    ```
+    - 상속보단 좀 더 복잡하긴 하지만, 
+    - 이 코드는 progressbar라는게 **사용되고** 있고, **어떻게 사용되고** 있는지 알 수 있다
+    - 그리고 progressbar 동작 방식을 수정할 수도 있다
+
+Inheritance breaks encapsulation
+- 상속 시, 외부에 보여지는 부분 외 내부 구현도 신경써야 한다. 이는 곧 캡슐화를 깨트리는 상황
+- e.g.
+    ```kotlin
+    class CounterSet<T> : HashSet<T>() {
+        var elementsAdded: Int = 0
+            private set
+
+        override fun add(element: T): Boolean {
+            elementsAdded++
+            return super.add(element)
+        }
+
+        override fun addAll(elements: Collection<T>): Boolean {
+            elementsAdded += elements.size
+            return super.addAll(elements)
+        }
+    }
+
+    fun main() {
+        val counterSet = CounterSet<String>()
+        counterSet.addAll(listOf("a", "b", "c"))
+        println(counterSet.elementsAdded) // 6 (not 3)
+    }
+    ```
+    - `allAll`에서 3을 기대했지만 실제론 6이 찍혔다. 그 이유는 `HashSet#addAll`은 내부적으로 `HashSet#add`를 호출하고 있기 때문에, `elementsAdded += elements.size`에서 3이 증가됐고 이후 `addAll`에서 요소의 수 만큼 `add`가 호출되어 `elementsAdded++`가 총 3번 호출됐기 때문에, 결과적으로 `elementsAdded`는 6이 된 것이다  
+    - 이를 해결하기 위해 delegation pattern을 적용해보자
+        - 위임 패턴은 대상 클래스가 인터페이스를 implements하고, 동일한 인터페이스의 객체를 멤버로 구성하고, 인터페이스에 정의된 메서드를 이 멤버 객체로 전달한다는 것
+            - 이 방법을 forwarding method라고도 부름
+        ```kotlin
+        class CounterSet2<T> : MutableSet<T> {
+            private val innerSet = HashSet<T>()
+            var elementsAdded: Int = 0
+                private set
+
+            override fun add(element: T): Boolean {
+                elementsAdded++
+                return innerSet.add(element)
+            }
+
+            override fun addAll(elements: Collection<T>): Boolean {
+                elementsAdded += elements.size
+                return innerSet.addAll(elements)
+            }
+
+            override val size: Int
+                get() = TODO("Not yet implemented")
+
+            // 이하 override해야하는 8개 메서드들
+        }        
+        ```
+        - 위 코드는 `MutableSet`의 메서드를 전부 override해줘야 하는 문제점이 있다. 
+        - 하지만 kotlin은 인터페이스 delegation을 지원하는 기능이 있다!!
+            ```kotlin
+            class CounterSet3<T>(
+                private val innerSet: MutableSet<T> = mutableSetOf()
+            ) : MutableSet<T> by innerSet {
+                var elementsAdded: Int = 0
+                    private set
+
+                override fun add(element: T): Boolean {
+                    elementsAdded++
+                    return innerSet.add(element)
+                }
+
+                override fun addAll(elements: Collection<T>): Boolean {
+                    elementsAdded += elements.size
+                    return innerSet.addAll(elements)
+                }
+            }
+            ```
+            - 이 위임 방식 역시 이게 완전 좋다기보단, 사용되기 적절하다고 판단될 때 사용하자
+                - 대부분 다형성이 필요 없거나, 위임 없이 composition만으로도 해결 가능할 테니,,
+- composition pattern으로 해결하면 재사용하기 쉽고, 유연성을 높일 수 있다 
+
+Restricting overriding
+- 기본적으로 클래스나 메서드는 final 상태이기 때문에, 상속으로 허용하고 싶다면 `open` modifier를 붙여줘야 한다 
+- 상속이 필요할 경우에만 `open`하자 
+
+<br/>
+
+> OOP에선 상속보다 composition을 권장하고,   
+> 코틀린은 이에 대한 지원을 더욱 강력하게 한다. 예를 들면 클래스나 메서드의 기본이 final인 것, interface delegation을 first-class citizen으로 만들었다는 것 등.  
