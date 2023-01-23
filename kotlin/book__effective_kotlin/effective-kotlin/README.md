@@ -1,5 +1,7 @@
 # [이펙티브 코틀린](https://product.kyobobook.co.kr/detail/S000001033129)
 
+<br/>
+
 ## :small_blue_diamond: 아이템 1: 가변성을 제한하라
 - `val`는 읽기 전용 프로퍼티지만, 변경할 수 없음<sub>immutable</sub>을 의미하는 것은 아니다
 - `val`는 `custom getter`나 델리게이트<sub>delegate</sub>로 정의할 수 있다
@@ -48,6 +50,8 @@
 - mutable 객체는 외부에 노출하지 말자
     - `item1.MutatingPoint.kt` 참고
 
+<br/>
+
 ## :small_blue_diamond: 아이템 2: 변수의 스코프를 최소화하라
 - 프로퍼티보단 지역 변수를 사용하자
 - 최대한 좁은 스코프를 갖게 변수를 사용하자
@@ -59,6 +63,8 @@
 ### 캡쳐링
 - 람다에선 변수를 캡처한다는 것을 기억하자
     - `item2.Capturing.kt` 참고
+
+<br/>
 
 ## :small_blue_diamond: 아이템 3: 최대한 플랫폼 타입을 사용하지 말라
 > - 플랫폼 타입<sub>platform type</sub>
@@ -88,11 +94,15 @@
         ```
         - 문제는 NPE 발생 위치. `statedType()`의 경우가 훨씬 에러를 파악하기 쉽다 
 
+<br/>
+
 ## :small_blue_diamond: 아이템 4: inferred 타입으로 리턴하지 말라
 > 코틀린의 타입 추론<sub>type inference</sub>은 유용한 기능이지만...  
 
 - 타입을 확실하게 지정해야 하는 경우엔 명시적으로 타입을 지정하자
 - 특별한 이유나 확실한 확인 없이는 타입을 제거하지 말자
+
+<br/>
 
 ## :small_blue_diamond: 아이템 5: 예외를 활용해 코드에 제한을 걸어라
 - 코틀린에는 코드의 동작에 제한을 거는 기능이 제공된다
@@ -128,10 +138,14 @@
 - throw나 return을 엘비스 연산자 오른쪽에 두는 방식으로 구현하면, 읽기 쉽고 유연한 코드를 짤 수 있다
 - `item5.SmartCastingEx.kt` 참고
 
+<br/>
+
 ## :small_blue_diamond: Item 6: Prefer standard errors to custom ones
 커스텀한 예외 대신 표준 예외를 사용하자.  
 
 - 이미 잘 알려진 표준 라이브러리의 예외를 사용하면, 사용자들이 API를 더 쉽게 이해할 수 있다. 
+
+<br/>
 
 ## :small_blue_diamond: Item 7: Prefer a nullable or Result result type when the lack of a result is possible
 결과가 없는 경우, 반환 타입을 nullable하게 하거나 `Result` 타입을 사용하자.    
@@ -196,6 +210,8 @@
 > 
 > 개발자가 특정 요소가 특정 위치에 있다는 걸 확신한다면 굳이 nullable에 대한 처리를 강제할 필요는 없지만,     
 > 조금이라도 의심된다면 `getOrNull`을 이용해 만약의 사태에 대비하는 걸 권장한다  
+
+<br/>
 
 ## :small_blue_diamond: Item 8: Handle nulls properly
 null을 적절하게 처리하자.  
@@ -307,6 +323,8 @@ null을 적절하게 처리하자.
 > - property delegation pattern은 `item 21`에서 더 다룰 예정
 >   - property delegate의 장점은 개발자가 nullable한 상황을 안전하게 피할 수 있게 도와주는 것
 
+<br/>
+
 ## :small_blue_diamond: Item 9: Close resources with `use`
 `use`를 사용해 리소스를 close하자
 
@@ -350,6 +368,8 @@ null을 적절하게 처리하자.
     - 이 시퀀스는 요청 시 줄을 읽고 메모리에 한 번에 한 줄만 보유하기 때문에 대용량 파일도 처리하는 데 적합한 방법이다
         > - 참고로 `item 51`에서 대규모 컬렉션 처리에 대한 방법을 더 알아본다
 
+<br/>
+
 ## :small_blue_diamond: Item 10: Write unit tests
 단위 테스트를 작성하자
 > 이는 코틀린에만 국한된 것은 아니다!  
@@ -385,6 +405,8 @@ null을 적절하게 처리하자.
 <br/>
 
 ---
+
+<br/>
 
 <br/>
 
@@ -427,6 +449,8 @@ var obj = FileInputStream("/file.gz")
 프로그래밍은 표현의 예술이다. 하지만 이해하고 지켜야 할 규칙이 존재한다.   
 이에 대해선 다음 아이템에서 알아보자.  
 
+<br/>
+
 ## :small_blue_diamond: Item 12: An operator’s meaning should be consistent with its function name
 연산자 오버로딩을 이용할 경우, 함수의 이름과 연산자의 의미가 일치하도록 만들자.  
 
@@ -446,6 +470,8 @@ body {
 }
 ```
 위와 같이 고전적인 HTML DSL에서, 요소에 텍스트를 추가하기 위해 `String.unaryPlus`를 사용했다.   
+
+<br/>
 
 ## :small_blue_diamond: Item 13: Use operators to increase readability
 앞선 `itme 12`에선 연산자 오버로딩의 오용에 대해 알아보았다. 이번 장에선 가독성을 높이기 위해 연산자를 사용하는 것에 대해 알아보자.  
@@ -480,6 +506,8 @@ val admins = users.map { ADMIN_TAG in user.tags }
 ```
 - 위 케이스들에서 A와 B 중 어떤 것이 더 읽기 쉬운가?
 
+<br/>
+
 ## :small_blue_diamond: Item 14: Specify the variable type when it is not clear
 코틀린이 제공해 주는 타입 추론 시스템 덕분에, 타입을 생략할 수 있다. 하지만 반환값이 명확하지 않은 경우 등에서 타입을 생략하면 오히려 가독성을 떨어트린다
 
@@ -488,6 +516,8 @@ val data = getSomeData() // data의 타입이 뭔지 알려면 함수를 확인�
 ```
 
 > 경우에 따라 어떤 구현 방법이 가독성을 떨어트리는지 잘 생각하고 구현하자.  
+
+<br/>
 
 ## :small_blue_diamond: Item 15: Consider referencing receivers explicitly
 리시버를 명시적으로 사용하자
@@ -523,6 +553,8 @@ val data = getSomeData() // data의 타입이 뭔지 알려면 함수를 확인�
         ```
 - 리시버를 변경해야 할 경우, 명시적 리시버를 사용하면 함수의 출처를 명확히 알 수 있기 때문에 가독성을 증가시킬 수 있다
 
+<br/>
+
 ## :small_blue_diamond: Item 16: Properties should represent a state, not a behavior
 - 코틀린의 프로퍼티는 자바의 필드와 비슷하게 생겼지만, 개념이 다르다
     - 둘 다 데이터를 보관할 수 있지만
@@ -543,15 +575,21 @@ val data = getSomeData() // data의 타입이 뭔지 알려면 함수를 확인�
 - 하지만 과도한 동작을 포함시키진 말자
     - 무거운 동작이 반복적으로 실행되기 때문에, 이 경우엔 함수로 추출되어야 한다
 
+<br/>
+
 ## :small_blue_diamond: Item 17: Consider naming arguments
 인수 이름을 잘 지어주자
 - 인수 이름을 활용하면 휴먼 에러를 방지할 수 있다
     - 인수가 n개 이상일 경우, 잘못된 위치에 인수를 전달할 확률이 낮아짐 
     - 동일한 타입의 인수가 여러 개 있을 때, 인수 이름을 이용해 헷갈림 방지 가능
 
+<br/>
+
 ## :small_blue_diamond: Item 18: Respect coding conventions
 컨벤션 잘 지키자. 코틀린 뿐만 아니라!
 - 프로젝트의 코드는 여러 사람이 아닌 한 사람이 작성한 것처럼 작성되어야 한다
+
+<br/>
 
 ## :small_blue_diamond: Item 19: Do not repeat knowledge
 재사용성의 중요성
@@ -568,6 +606,8 @@ Single responsibility principle<sub>srp</sub>
 - 클래스가 변경되는 이유는 하나여야 한다
     - 둘 이상의 이유로 하나의 클래스가 변경되선 안된다 
 
+<br/>
+
 ## :small_blue_diamond: Item 20: Do not repeat common algorithms
 비즈니스 로직을 포함하지 않고 별도 모듈/라이브러리로 추출할 수 있는 패턴은 일반적인 동작을 한다. 이들을 반복적으로 구현하진 말자
 - 어디선가 한 번 사용되면 최적화되어, 다른 사용처에서도 이 이득을 누릴 수 있음
@@ -578,6 +618,8 @@ stdlib<sub>standard library</sub>를 항상 살펴보자!
     - 구체적인 타입이 있는 개체에서만 사용하도록 제한할 수 있어 좋음
     - 수정할 객체를 인수로 받는 것보다, 확장 리시버로 사용하는게 더 가독성에 좋음
     - 일반 함수보다 찾기 쉬움(자ㅏ동 완성을 빨리 할 수 있)
+
+<br/>
 
 ## :small_blue_diamond: Item 21: Use property delegation to extract common property patterns
 - 프로퍼티 패턴을 추출하는 방법에 프로퍼티 위임이 사용된다 
@@ -595,6 +637,8 @@ stdlib<sub>standard library</sub>를 항상 살펴보자!
 
 > *책엔 안드로이드 예시가 많이 나옴...* 
 
+<br/>
+
 ## :small_blue_diamond: Item 22: Use generics when implementing common algorithms
 타입 파라미터는 컴파일 타이에 타입을 확인하고 올바르게 추론할 수 있어 더욱 안전한 프로그래밍을 할 수 있다  
 
@@ -603,6 +647,8 @@ stdlib<sub>standard library</sub>를 항상 살펴보자!
 
 타입 파라미터는 구체적인<sub>concrete</sub> 타입의 서브타입만 사용하도록 타입을 제한할 수 있다
 - 이렇게 하면 이 concrete 타입이 제공하는 함수를 안전하게 사용할 수 있다
+
+<br/>
 
 ## :small_blue_diamond: Item 23: Avoid shadowing type parameters
 동일한 이름으로 클래스 프로퍼티와 함수 파라미터를 정의할 경우, 함수 파라미터가 외부 스코프인 프로퍼티를 가리는 상황이 발생한다. 이를 섀도잉<sub>shadowing</sub> 이라 한다.  
@@ -613,6 +659,8 @@ class Forest(val name: String) {
 ```
 
 섀도잉이 발생할 수 있는 상황을 만들지 말자.  
+
+<br/>
 
 ## :small_blue_diamond: Item 24: Consider variance for generic types
 예시
@@ -849,4 +897,459 @@ Variance modifier positions
     - `A is a subtype of B`일 때, `Cup<B> is a subtype of Cup<A>`가 된다
     - contravariant type은 in-position에 쓸 수 있다 <sub>e.g. `set()`</sub>
   
-> `out`은 only read, `in`은 only modify  
+```kotlin
+var list1 = listOf<Any>()
+val list2 = listOf<Int>()
+list1 = list2
+
+var list3 = arrayOf<Any>()
+val list4 = arrayOf<Int>()
+list3 = list4 // compile error: Type mismatch.
+```
+- `List`, `Set`, `Map`의 타입 파라미터는 covariant
+- `Array`, `MutableList`, `MutableSet`, `MutableMap`의 타입 파라미터는 invariant
+
+> `out`은 only read(함수에서 반환), `in`은 only modify(함수에서 인자)  
+
+<br/>
+
+## :small_blue_diamond: Item 25: Reuse between different platforms by extracting common modules
+
+<br/>
+
+## :small_blue_diamond: Item 26: Each function should be written in terms of a single level of abstraction
+> - 추상화는 복잡성을 숨기기 위해 사용되는 단순화된 형태
+> - 모든 인스턴스가 하나의 추상화만을 가지는 건 아니다. 관점에 따라 다양한 인터페이스로 표현할 수 있다
+
+- 기능은 작고 최소한의 책임을 가지도록 한다
+- 적절한 추상화를 통해 읽기 쉬운 코드를 만들면, 함수를 재사용하기 용이하고 테스트하기 쉽다
+
+Abstraction levels in program architecture
+- 추상화를 이용해 하위 시스템의 세부 사항을 숨기고 관심사를 분리하여 상호 운영성<sub>interoperability</sub>과 플랫폼 독립성<sub>platform independence</sub>을 가능케 할 수 있다
+    > - Code Complete by Steve McConnell, 2nd Edition, Section 34.6
+
+<br/>
+
+## :small_blue_diamond: Item 27: Use abstraction to protect code against changes
+- 추상화를 이용한다면 코드 변경/변화로부터 자유로울 수 있다
+- 추상화로 가는 길
+    - Extracting constant
+    - Wrapping behavior into a function
+    - Wrapping function into a class
+    - Hiding a class behind an interface
+    - Wrapping universal objects into specialistic
+    - Using generic type parameters
+    - Extracting inner classes
+    - Restricting creation, for instance by forcing object creation via factory method
+- 추상화의 문제점
+    - 너무 많은 추상화는 행동 결과를 예측하기 어렵게 할 수도 있다
+    - 코드 이해력을 떨어트릴 수 있다 
+- 팀 사이즈, 프로젝트 사이즈, 도메인 지식 등 조건에 따라 적절한 추상화를 하자 
+
+<br/>
+
+## :small_blue_diamond: Item 28: Specify API stability
+- 표준 API를 선호하는 이유
+    - 익숙하지 않은 API 업데이트에 대응하기 어려운 문제
+    - 새 API를 학습하는데 필요한 러닝 커브
+- 도입 단계라면
+    ```kotlin
+    @Experimental(level = Experimental.Level.WARNING)
+    annotation class ExperimentalNewApi
+
+    @ExperimentalNewApi
+    suspend fun getUsers(): List<User> { ... }
+    ```
+- 전환하고자 한다면
+    ```
+    @Deprecated("Use suspending getUsers instead")
+    fun getUsers(callback: (List<User>)->Unit) { ... }
+
+    // 대안이 있는 경우 
+    @Deprecated("Use suspending getUsers instead", ReplaceWith("getUsers()"))
+    fun getUsers(callback: (List<User>)->Unit) { ... }
+    ```
+  
+- API를 갑자기 변경하여 사용자에게 고통을 주지 말자..  
+- 사용자가 API를 안정적으로 쓸 수 있도록 잘 가이드하자
+    - 모듈/라이브러리에 description을 잘 작성하자
+    - 버전 이름, 도큐먼트, 주석을 잘 업데이트하자 
+
+<br/>
+
+## :small_blue_diamond: Item 29: Consider wrapping external API
+- 사용자의 프로젝트에 맞게 API를 래핑해서 쓰자 
+    - 사용자 입맞에 맞게 바꿔가며 사용할 수 있다
+- 문제점도 있음
+    - 래핑된 API에 대해 알아야 함. 그리고 이 래핑된 API에서 문제가 발생하면 이에 대한 해결 방식 또한 내부에서 가지고 있어야 함
+
+<br/>
+
+## :small_blue_diamond: Item 30: Minimize elements visibility
+- 내부 요소를 변경할 수 있는 set은 외부로 드러나지 않게 하자 
+    ```kotlin
+    class CounterSet<T>(
+        private val innerSet: MutableSet<T> = mutableSetOf()
+    ) : MutableSet<T> by innerSet {
+        var elementsAdded: Int = 0
+            private set
+
+        override fun add(element: T): Boolean {
+            elementsAdded++
+            return innerSet.add(element)
+        }
+
+        override fun addAll(elements: Collection<T>): Boolean {
+            elementsAdded += elements.size
+            return innerSet.addAll(elements)
+        }
+    }
+    ```
+- 가시성이 제한적일 때, 클래스가 어떻게 변경되는지 추척하기 쉽다
+- 요소가 외부로 드러나야 할 이유가 없다면 숨기도록 하자 
+    - 단, 이 규칙에서 data를 가지고 있는 클래스는 제외.
+        - e.g. data model class, DTO... 
+
+> #### 클래스 멤버의 가시성 변경자
+> - private 
+>     - visible inside this class only.
+> - protected 
+>     - visible inside this class and in subclasses.
+> - internal 
+>     - visible inside this module, for clients who see the declaring class.
+> - public (default) 
+>     - visible everywhere, for clients who see the declaring class.
+>
+> #### Top-level 요소의 가시성 변경자
+> - private 
+>     - visible inside the same file only. 
+> - internal 
+>     - visible inside this module.
+> - public (default) 
+>     - visible everywhere.
+> 
+> 모듈과 패키지는 다르다. 코틀린에서 'same module'은 '함께 컴파일된 코틀린 소스의 세트'로 정의된다.  
+> - e.g. Gradle source set, Maven project, IntelliJ IDEA module, a set of files compiled with one invocation of the Ant task.
+
+<br/>
+
+## :small_blue_diamond: Item 31: Define contract with documentation
+- 주석을 적절하게 이용하면 해당 기능에 대해 더욱 빠르게 파악할 수 있다 
+- 적절한 contract를 정의하여, 사용자가 세부 구현에 의존하지 않도록 하자
+    - names
+    - comments and documentation    
+        - 기능을 설명해 줄 가장 강력한 방법
+    - types
+        - 인자 타입, 반환 타입
+- 주석이 항상 좋은 것은 아니다
+    - 함수 이름과 매개 변수로 명확하게 기능을 인지할 수 있다면, 굳이 주석을 달아서 과대 정보를 불필요하게 전달하지 말도록..
+- 사용자에게 API의 contract를 통해 현재 어떻게 동작하고 앞으로 어떻게 동작할 것인지 확신을 주자 
+
+KDoc
+- 주석을 사용해 기능을 문서화할 때, 해당 주석을 제시하는 공식 형식을 `KDoc`이라 한다
+- 형식
+    - `/** ... */`
+    - 마크다운으로 작성
+    - 첫째 단락은 요약 설명, 둘째 단락은 자세한 설명, 그다음부턴 태그
+- 태그
+    - `@param`, `@return`, `@constructor`, `@author`...
+
+<br/>
+
+## :small_blue_diamond: Item 32: Respect abstraction contracts
+- 프로그램을 안정적으로 유지하려면 contract를 잘 지키자
+    - 가시성을 private으로 해두었다면 그럴 만한 이유가 있었을 것이다...
+    - 만약 이를 부숴야 한다면, 이 사실을 잘 문서화해두자 
+
+<br/>
+
+## :small_blue_diamond: Item 33: Consider factory functions instead of secondary constructors
+클래스를 객체화할 때 기본 생성자 외 다른 방식으로 생성하고자 한다면, 생성자 대신 함수로 만들어보자
+- 함수는 이름이 있기 때문에, 어떻게 생성하는지 그리고 인자가 무엇인지 드러낼 수 있다. 좀 더 알기 쉽다! 
+    - e.g. `ArrayList(3)` vs `ArrayList.withSize(3)`
+        - 전자는 `3`이 사이즈인지 요소인지 알 수 없다. 후자는 직관적으로 알 수 있다 
+- 동일한 인자 타입을 가진 생성자들끼리 충돌을 미연에 방지할 수 있다
+- 함수는 생성자와는 달리 반환 타입의 하위 타입으로 반환할 수도 있다
+    - 자유도가 증가함
+    - e.g. `listOf` -> 여러 타입으로 리스트를 만들어낼 수 있음
+- 생성자와 달리 함수는 호출될 때마다 새 객체를 생성하지 않을 수 있다
+    - 캐싱 등을 이용해 객체 생성을 최적화하거나(e.g. like singleton pattern), 객체 재사용, 혹은 객체를 생성할 수 없을 때 null을 리턴하는 정적 팩토리 함수(e.g. `Connections.createOrNull()`) 등..
+- 생성자는 슈퍼 클래스의 생성자나 주 생성자를 즉시 호출하지만, 함수를 이용하면 생성자 호출을 연기할 수도 있다 
+
+#### :heavy_check_mark: factory function의 종류와 규칙
+**Companion Object Factory Functions**
+- 자바에서 대부분의 factory function은 static으로 선언되어 있다. 코틀린 커뮤니티는 자바에 기원을 두고 있어, factory function를 companion obejct에 정의하여 이 관행을 모방하고 있다  
+    ```kotlin
+    class LinkedList<T>(
+        val head: T,
+        val tail: LinkedList<T>?
+    ) {
+        companion object {
+            fun <T> of(vararg elements: T): LinkedList<T> { ... }
+        }
+    }
+
+    // usage
+    val list = LinkedList.of(1, 2)
+    ```
+- companion object factory function은 companion object에 정의되어야 하며, top-level 함수는 어디서든 정의할 수 있다. companion object factory function는 companion object에 대한 확장으로 정의할 수 있다!  
+    ```kotlin
+    interface Tool {
+        companion object { ... }
+    }
+
+    fun Tool.Companion.createBigTool(/*...*/): Tool { ... }
+
+    val tool = Tool.createBigTool()
+    ```
+- companion object factory function에는 몇 가지 네이밍 규칙이 존재한다
+    - e.g.
+        - `from`
+            - e.g. `val date: Date = Date.from(instant)`
+        - `of`
+            - e.g. `val faceCards: Set<Rank> = EnumSet.of(JACK, QUEEN, KING)`
+        - `valueOf`
+            - e.g. `val prime: BigInteger = BigInteger.valueOf(Integer.MAX_VALUE)`
+        - `instance` or `getInstance`
+            - e.g. `val luke: StackWalker = StackWalker.getInstance(options)`
+        - `createInstance` or `newInstance`
+            - e.g. `val newArray = Array.newInstance(classObject, arrayLen)`
+        - `get{Type}`
+            - e.g. `val fs: FileStore = Files.getFileStore(path)`
+        - `new{Type}`
+            - e.g. `val br: BufferedReader = Files.newBufferedReader(path)`
+- companion object는 static 요소의 대체제 뿐 아니라, 인터페이스 구현이나 클래스 상속도 가능하다
+    ```kotlin
+    abstract class ActivityFactory {
+        abstract fun getIntent(context: Context): Intent
+        ...
+    }
+
+    class MainActivity : AppCompatActivity() {
+        ...
+        companion object : ActivityFactory() {
+            override fun getIntent(context: Context): Intent {}
+        }
+    }
+    ```
+- abstract companion object factory는 값을 가질 수 있어, 캐싱을 구현하거나 테스트를 위한 fake 생성도 지원할 수 있다
+
+**Top-level factory functions**
+- 일반적으로 top-level factory function을 이용해 개체를 생성할 수 있다
+    - 대표적인 예
+        - `listOf`, `setOf`, `mapOf`...
+- companion object보다 읽기 쉬울 수도?
+    - `List.of(1, 2, 3)` vs `listOf(1, 2, 3)`
+- top-level factory function은 모든 곳에서 사용할 수 있으므로 <sub>혼란을 야기하지 않도록</sub> 네이밍 등에 신경써서  신중히 만들도록 하자
+
+**Builders**
+- 코틀린에서 빌더를 구현하는 일반적인 방법은 top-level function과 DSL 패턴을 이용하는 것이다
+    ```kotlin
+    val s = sequence {
+        yield("A")
+        yield("B")
+    }
+
+    println(s.toList())
+    ```
+- kotlin 코루틴에서 코루틴을 시작하거나 흐름을 정의할 때 빌더 패턴을 일반적으로 사용하고 있다 
+    ```kotlin
+    scope.launch { ... }
+    ```
+
+**Conversion methods**
+- A 타입에서 B 타입으로 convert할 때, conversion method를 사용할 수 있다
+    ```kotlin
+    val sequence: Sequence = list.asSequence() 
+    val double: Double = i.toDouble()
+    val flow: Flow = observable.asFlow()
+    ```
+
+**Fake constructors**
+- 생성자는 top-level function과 동일하게 동작한다
+    ```kotiln
+    class A
+    fun b() = A()
+
+    val x = A()
+    val y = b()
+    ```
+- '생성자 참조' 역시 top-level function과 동일하게 동작한다
+    ```kotlin
+    val reference: () -> A = ::A
+    ```
+    - '생성자 참조'는 함수 타입<sub>function type</sub>을 구현한다
+   
+- 위 예시를 보면 생성자와 함수 사용 차이는 대/소문자인 것을 알 수 있다
+    - 생성자는 대문자, 함수는 소문자로 시작함
+    - but, kotlin standard library에서는 함수 중 이름이 대문자로 시작하는 경우가 있음
+        - e.g. `List`, `MutableList`
+            ```kotlin
+            @SinceKotlin("1.1")
+            @kotlin.internal.InlineOnly
+            public inline fun <T> List(size: Int, init: (index: Int) -> T): List<T> = MutableList(size, init)
+
+            @SinceKotlin("1.1")
+            @kotlin.internal.InlineOnly
+            public inline fun <T> MutableList(size: Int, init: (index: Int) -> T): MutableList<T> {
+                val list = ArrayList<T>(size)
+                repeat(size) { index -> list.add(init(index)) }
+                return list
+            }
+            ```
+            ```kotlin
+            List(4) { "User$it" } // [User0, User1, User2, User3]
+            ```
+        - 이 top-level 함수는 생성자처럼 보이고 동작하지만, factory function의 이점을 가졌다
+            - 사용하는 쪽에선 이것이 top-level 함수라는걸 알 필요 없이 생성자처럼 쓰게 된다. 그래서 이러한 함수를 facke constructor라고 부른다
+- fake constructor를 만드는 이유
+    - interface에 대한 생성자가 필요해서
+    - reified type parameter가 필요해서  
+- fake constructor를 만드는 또다른 방법
+    - `invoke` operator를 가진 companion object
+        ```kotlin
+        class Tree<T> {
+            companion object {
+                operator fun <T> invoke(size: Int, generator: (Int) -> T): Tree<T> { ... }
+            }
+        }
+        ```    
+        ```kotlin
+        Tree(10) { "$it" }
+        ```    
+        - 이 방법은 권장되진 않음. `item 12`에 어긋남. 
+            - companion object를 호출한다면, 연산자 대신 이름을 사용해라 
+                ```kotlin
+                Tree.invoke(10) { "$it" }
+                ```    
+            - but, 이렇게 써버리면 이 호출이 어떤걸 의미하는지 파악하기 더 어려워짐. top-level function으로 만드는게 더 나음
+- 정리하자면, fake constructor가 꼭 필요하다면, 이는 standard top-level function으로 만들자
+
+**Methods on factory classes**
+- factory class와 관련된 패턴들
+    - abstract factory, prototype...
+- factoruy class의 장점
+    - 클래스가 상태를 가질 수 있음
+        ```kotlin
+        data class Student(
+            val id: Int,
+            val name: String, val surname: String
+        )
+
+        class StudentsFactory {
+            var nextId = 0
+            fun next(name: String, surname: String) = Student(nextId++, name, surname)
+        }
+        ```    
+        ```kotlin
+        val factory = StudentsFactory()
+        val s1 = factory.next("Marcin", "Moskala")
+        println(s1) // Student(id=0, name=Marcin, Surname=Moskala)
+        val s2 = factory.next("Igor", "Wojda")
+        println(s2) // Student(id=1, name=Igor, Surname=Wojda)
+        ```    
+        - 상태를 가지기 때문에 객체 생성을 최적화할 수도 있다. 
+            - 캐싱하거나, 객체를 복사하여 생성 속도를 높이거나, 
+            - 논리적으로 분리하여 코드 구성을 잘 하거나
+                - 객체 생성 시 여러 service나 repository가 필요하다면, 이를 팩토리 클래스로 추출할 수도 있고!
+                    ```kotlin
+                    class UserFactory(
+                        private val uuidProvider: UuidProvider,
+                        private val timeProvider: TimeProvider,
+                        private val tokenService: TokenService,
+                    ) {
+                        fun create(newUserData: NewUserData): User {
+                            val id = uuidProvider.next()
+                            return User(
+                                id = id,
+                                creationTime = timeProvider.now(), 
+                                token = tokenService.generateToken(id), 
+                                name = newUserData.name,
+                                ...
+                            )
+                        }
+                    }
+                    ```                
+
+<br/>
+
+## :small_blue_diamond: Item 34: Consider a primary constructor with named optional arguments
+- 주 생성자를 이용하여 객체를 생성할 때, 인자에 이름을 붙이면 어떤 인자인지 좀 더 명확하게 알 수 있다
+
+<br/>
+
+## :small_blue_diamond: Item 35: Consider defining a DSL for complex object creation
+- DSL<sub>Domain Specific Language</sub>을 이용해 복잡한 객체나 객체 계층 구조를 정의할 수 있다. 정의하기 쉽지는 않지만, 이를 이용한다면 복잡한 코드를 숨길 수 있다는 장점이 있다
+
+Defining your own DSL
+- DSL을 이해하려면 리시버<sub>receiver</sub>가 있는 function type을 이해해야 한다
+    - few examples of function types
+        - `() -> Unit` 
+            - Function with no arguments that returns Unit
+        - `(Int) -> Unit`
+        - `(Int) -> Int`
+        - `(Int, Int) -> Int`
+            - two arguments of type Int and returns Int
+        - `(Int) -> () -> Unit` 
+            - Function that takes Int and returns an other function. This other function has no arguments and returns Unit
+        - `(() -> Unit) -> Unit` 
+            - Function that takes another function and returns Unit. This other function has no arguments and returns Unit
+    - function type 의 인스턴스를 생성하는 방범
+        - lambda expressions
+        - anonymous functions
+        - function references
+- function type은 '함수를 나타내는 객체'를 표현하는 수단이다        
+    - 프로퍼티의 타입이 명확한 경우, 람다식과 익명 함수의 argument type을 유추할 수 있다 <sub>익명 함수는 이름 없는 함수, 람다식은 익명 함수를 짧게 표기한 것</sub>
+        ```kotlin
+        fun plus(a: Int, b: Int) = a + b
+
+        val plus1: (Int, Int) -> Int = { a, b -> a + b}
+        val plus2: (Int, Int) -> Int = fun(a, b) = a + b
+        val plus3: (Int, Int) -> Int = ::plus
+        ```
+    - argument type이 명확한 경우, 함수 타입을 정의할 수 있다
+        ```kotlin
+        val plus4 = { a: Int, b: Int -> a + b }
+        val plus5 = fun(a: Int, b: Int) = a + b
+        // val plus5 = fun(a: Int, b: Int): Int = a + b
+        ```
+    - anonymous extension function
+        - `val myPlus = fun Int.(other: String) = this.toString() + other`
+            - `myPlus`의 타입은 '리시버가 있는 함수' 타입<sub>function type with a receiver</sub>이다. 
+                - 일반 함수와 비슷하게 생겼지만, '인자 앞에 `.`으로 구분된' 리시버 타입(`Int`)이 선언돼있다
+        - 이 타입은 람다식<sub>lambda expression with receiver</sub>으로 표현할 수도 있다
+            - `val myPlus: Int.(String) -> String = { this.toString() + it }`
+        - 사용 예
+            ```kotlin
+            fun main() {
+                val x = 3
+
+                val y1 = x.myPlus1("a")
+                val y2 = x.myPlus2("a")
+                val y3 = x.myPlus3("a")
+                val y4 = x.myPlus4("a")
+
+                // 위와 같이 일반적인 extension function 사용하듯이 사용할 수도 있고, 
+                // invoke 메서드를 호출해서 사용할 수도 있고
+                val z1 = myPlus2.invoke(x, "a")
+                // non-extension function 처럼 사용할 수도 있다
+                val r1 = myPlus2(x, "a")
+            }
+
+            fun Int.myPlus1(other: String) = this.toString() + other
+            val myPlus2 = fun Int.(other: String) = this.toString() + other
+            val myPlus3: Int.(String) -> String = fun Int.(other: String) = this.toString() + other
+            val myPlus4: Int.(String) -> String = { this.toString() + it }        
+            ```
+        - 참고
+            - item35/AnonymousExtension2.kt
+            - item35/DslEx.kt
+
+When should we use DSLs?
+- DSL은 명확하고 구조화된 방식으로, 정보를 빠르게 전달할 때 사용할 수 있다 
+- DSL은 보일러플레이트<sub>boilerplate</sub> 제거에 적합하다. 만약 반복적인 보일러 플레이트 코드가 있고 이를 해결해 줄 코틀린 기능이 없다면, 그땐 DSL 사용을 고려해 보자
+- 하지만 익숙하지 않은 이에겐 복잡도를 증가시키므로 잘 판단해서 써라~ 
+
+> boilerplate code
+> - Repeatable code that does not contain any important information for a reader.
+
