@@ -1884,3 +1884,58 @@ The contract of hashCode
 Implementing hashCode
 - 웬만하면 스스로 재정의하지 말고 data class를 사용하도록 하고, 재정의가 꼭 필요하다면 IDE가 만들어주는 걸로 쓰자
     - 괜히 잘못만들면 충돌이 발생해, hash를 쓰는 이점이 없어짐
+
+<br/>
+
+## :small_blue_diamond: Item 44: Respect the contract of `compareTo`
+- `compareTo`는 비교를 위한 operator이다.
+    ```kotlin
+    obj1 > obj2 // translates to obj1.compareTo(obj2) > 0
+    obj1 < obj2 // translates to obj1.compareTo(obj2) < 0
+    obj1 >= obj2 // translates to obj1.compareTo(obj2) >= 0
+    obj1 <= obj2 // translates to obj1.compareTo(obj2) <= 0
+    ```
+- <sub>`Any`가 제공해주는 메서드는 아니고</sub> `Comparable<T>` 인터페이스에 위치해있다 
+- 객체가 이 인터페이스를 구현하고 있거나, `compareTo` 라는 이름을 가진 인자 하나를 받는 메서드를 갖고 있다면, 해당 객체는 정렬이 가능하다는 뜻이다 
+    - `a >= b` and `b >= a`이면, `a == b` 
+    - `a >= b` and `b >= c`이면, `a >= c`
+        - `a > b` and `b > c`, then `a > c`
+    - 두 요소를 비교할 땐 `a >= b` or `b >= a`의 관계성을 가지고 있어야 한다 
+- e.g.
+    ```kotlin
+    class User(val name: String, val surname: String)
+
+    fun main() {
+        val names = listOf(
+            User("GA", "KIM"),
+            User("SEA", "PARK"),
+        )
+        val sorted = names.sortedBy { it.surname }
+        val sorted2 = names.sortedWith(compareBy({ it.surname }, { it.name }))
+    }
+    ```
+    - 이렇게 구현할 수도 있음
+        ```kotlin
+        class User2(val name: String, val surname: String) {
+            companion object {
+                val DISPLAY_ORDER = compareBy(User2::surname, User2::name)
+            }
+        }
+        ```
+        - 참고 `item44.User2`
+
+Implementing `compareTo`
+- `compareValues`
+    - 2개의 값을 비교할 때
+    - e.g. `compareValues(surname, other.surname)` 
+- `compareValuesBy`
+    - 2개 이상의 값을 비교할 때
+    - e.g. `compareValuesBy(this, other, { it.surname }, { it.name })`
+- 반환값은 아래와 같이 해석하면 된다
+    - `0`
+        - receiver와 다른 receiver가 동일한 경우
+    - positive number
+        - receiver가 다른 receiver보다 클 경우
+        - e.g. `override fun compareTo(other: T)` 에서 this가 other보다 클 때
+    - negative number
+        - receiver가 다른 receiver보다 작으면
