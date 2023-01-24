@@ -1820,3 +1820,67 @@ The contract of equals
 <br/>
 
 > 커스텀하게 equals를 만들어내는 건 쉬운 일이 아니니. 웬만하면 주어진 data class를 쓰도록 하자    
+
+<br/>
+
+## :small_blue_diamond: Item 43: Respect the contract of `hashCode`
+- `hashCode`함수는 `Hashtable` 자료구조를 사용하고 있다 
+
+Hashtable
+- 동일한 입력값은 동일한 결과값을 반환해주는 hash function을 이용해 빠르게 요소를 찾을 수 있다
+- 해시 결과는 배열 형태에 인덱스로 저장해둔다
+- `LinkedHashSet`이나 `LinkedHashMap`에도 사용되고 있음
+
+The problem with mutability
+- 해싱을 하기 때문에, 요소 값에 변경이 있어도 해시테이블 내에선 그 사실을 알 수 없음. 즉 요소에 변경이 있다면 `LinkedHashSet`나 `LinkedHashMap`은 기대했던대로 동작하지 않는다
+- e.g.
+    ```kotlin
+    data class FullName(
+        var name: String,
+        var surname: String
+    )
+
+    fun main() {
+        val fullNameSet = mutableSetOf<FullName>()
+
+        val person = FullName("ISOO", "CHO")
+        fullNameSet.add(person)
+
+        person.name = "AGNES"
+        println("person: $person") // person: FullName(name=AGNES, surname=CHO)
+        println(fullNameSet.contains(person)) // false
+        println(fullNameSet.first() == person) // true
+    }
+    ```
+    -  mutable한 객체는 '해시 기반의 데이터 구조'나 'mutable한 속성을 기반으로 요소를 구성하는 다른 데이터 구조'에 사용되어서는 안 되는 이유! `Set`이나 `Map`의 key로 mutable 요소를 사용해서는 안 되며, 이 자료 구조에 속한 요소를 변형해서는 안 된다.
+
+The contract of hashCode
+- 동일한 객체를 한 번 이상 호출해도, `equals`에 사용되는 정보가 수정되지 않는 한 `hashCode()`는 동일한 integer를 반환해야 한다
+    - `hashCode`의 일관성이 유지되어야 한다는 뜻
+- 두 객체가 `equals == true`일 때, 각각의 `hashCode()` 결과값은 동일한 integer 값이어야 한다
+    - `hashCode`의 결과는 항상 `equal`의 결과와 일치해야 하며<sub>hashCode같으면 equals도 같아야 함</sub>, `equal`와 `hashCode`는 동일한 요소로 비교해야 한다
+- e.g. 
+    ```kotlin
+    class FullName2(
+        var name: String,
+        var surname: String
+    ) {
+        override fun equals(other: Any?): Boolean =
+            other is FullName2
+                    && other.name == name
+                    && other.surname == surname
+    }
+
+    fun main() {
+        val fullName2Set = mutableSetOf<FullName2>()
+        fullName2Set.add(FullName2("ISOO", "CHO"))
+
+        val y = FullName2("ISOO", "CHO")
+        println(y in fullName2Set) // false  (FullName2가 hashCode도 재정의하면, true 나옴)(equals만 재정의했기 때문에, set의 key에선 y의 hashCode가 다르다고 판단하고 false를 리턴한 것임)
+        println(y == fullName2Set.first()) // true
+    }
+    ```
+
+Implementing hashCode
+- 웬만하면 스스로 재정의하지 말고 data class를 사용하도록 하고, 재정의가 꼭 필요하다면 IDE가 만들어주는 걸로 쓰자
+    - 괜히 잘못만들면 충돌이 발생해, hash를 쓰는 이점이 없어짐
