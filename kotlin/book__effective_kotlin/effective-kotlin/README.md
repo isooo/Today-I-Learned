@@ -1666,3 +1666,97 @@ Restricting overriding
 
 > 한 클래스 내에서 분기문 같은 걸로 여러 서브 클래스를 생성하거나 관리하는 형태를 tagged라 표현하는 듯
 > - 참고 `item40.TaggedClass.kt`, `item40.SealedClass.kt`
+
+<br/>
+
+## :small_blue_diamond: Item 41: Use enum to represent a list of values
+- 종류가 구체적이거나, 상수 셋을 표현하고자 할 땐 enum을 쓰자
+    - 구체적인 상수값 집합을 나타내는데 최적
+
+상태값
+- 각 enum은 enum class의 인스턴스이므로, 상태값을 가질 수 있다 
+    ```kotlin
+    enum class PaymentOption {
+        CASH,
+        CARD,
+        TRANSFER;
+
+        // This is a global mutable state,
+        // so generally not the best practice (see Item 1)
+        var commission: BigDecimal = BigDecimal.ZERO
+    }
+
+    fun main() {
+        val c1 = PaymentOption.CARD
+        val c2 = PaymentOption.CARD
+        print(c1 == c2) // true,
+        // because it is the same object
+
+        c1.commission = BigDecimal.TEN
+        print(c2.commission) // 10
+        // because c1 and c2 point to the same item
+        
+        val t = PaymentOption.TRANSFER
+        print(t.commission) // 0,
+        // because commission is per-item
+    }
+    ```
+    - 위 예시처럼 var 대신, 아래와 같이 주 생성자를 이용하자
+        ```kotlin
+        enum class PaymentOption(val commission: BigDecimal) {
+            CASH(BigDecimal.ONE),
+            CARD(BigDecimal.TEN),
+            TRANSFER(BigDecimal.ZERO)
+        }
+        ```
+        ```kotlin
+        PaymentOption.CARD.commission
+        val paymentOption: PaymentOption = PaymentOption.values().random()
+        ```
+
+메서드
+- enum은 추상 메서드를 선언할 수도 있는데, 그럼 각 인스턴스에선 이를 override 해줘야함
+    ```kotlin
+    enum class PaymentOption(val commission: BigDecimal) {
+        CASH(BigDecimal.ONE) {
+            override fun printAccount(description: String) {/* ... */}
+        },
+        ...;
+
+        abstract fun printAccount(description: String)
+    }
+    ```
+    - 참고 `item41.PaymentOption`
+- 위 방식보단, 아래처럼 주 생성자에 function type을 받도록 하는게 더 유용함
+    ```kotlin
+    enum class PaymentOption2(val commission: BigDecimal, val printAccount: (String) -> Unit) {
+        CASH(BigDecimal.ONE, ::println),
+        ...
+    }
+    ```
+    - 참고 `item41.PaymentOption2`
+- 아니면 아래처럼 extension function을 이용하는 방법도 있음 
+    ```kotlin
+    fun PaymentOption3.printAccount(description: String) {
+        when (this) {
+            PaymentOption3.CASH -> println(description)
+            PaymentOption3.CARD -> println(description)
+            PaymentOption3.TRANSFER -> println(description)
+        }
+    }
+    ```
+    - 참고 `item41.PaymentOption3`, `item41.EnumTestKt#printAccount` 
+
+지원되는 함수
+- `values()`나 `enumValueOf()`를 이용해 enum 항목을 가져올 수 있음
+
+장점
+- `Comparable`를 구현하고 있음
+- `toString`, `hashCode`, `equals`를 구현함
+- 직렬화/역직렬화 쉬움
+
+<br/>
+
+> Enum or a sealed class?
+> - enum class는 구체적인 값 집합을, sealed class는 구체적인 클래스의 집합을 나타낸다
+> - 클래스는 object로 선언할 수 있기 때문에, enum 대신 sealed를 쓸 순 있지만, sealed 대신 enum을 쓸 순 없다

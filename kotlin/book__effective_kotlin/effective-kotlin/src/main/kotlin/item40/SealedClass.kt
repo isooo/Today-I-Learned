@@ -1,5 +1,7 @@
 package item40
 
+import java.math.BigDecimal
+
 sealed class ValueMatcher2<T> {
     abstract fun match(value: T): Boolean
 
