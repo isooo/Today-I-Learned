@@ -1342,8 +1342,8 @@ Defining your own DSL
             val myPlus4: Int.(String) -> String = { this.toString() + it }        
             ```
         - 참고
-            - item35/AnonymousExtension2.kt
-            - item35/DslEx.kt
+            - `item35/AnonymousExtension2.kt`
+            - `item35/DslEx.kt`
 
 When should we use DSLs?
 - DSL은 명확하고 구조화된 방식으로, 정보를 빠르게 전달할 때 사용할 수 있다 
@@ -1552,3 +1552,117 @@ Restricting overriding
 
 > OOP에선 상속보다 composition을 권장하고,   
 > 코틀린은 이에 대한 지원을 더욱 강력하게 한다. 예를 들면 클래스나 메서드의 기본이 final인 것, interface delegation을 first-class citizen으로 만들었다는 것 등.  
+
+<br/>
+
+## :small_blue_diamond: Item 37: Use the data modifier to represent a bundle of data
+- data class는 bundle of data를 전달할 때 사용한다
+- class에 `data` modifier를 추가하면 몇 가지 기능이 추가된다
+    - `toString`
+    - `equals` and `hashCode`
+        - `equals`는 주 생성자의 프로퍼티 값이 모두 일치하는지 체크 (동등성 체크)
+        - `hashCode`는 동일성 체크
+    - `copy`
+        - 주 생성자의 프로퍼티와 동일한 값을 가지는 객체를 만들어냄. 단 이름있는 인수를 사용하여 다른 값을 입력할 수도 있음
+    - `componentN` <sub>`component1`, `component2`, etc.</sub>
+        - `N` 함수로 프로퍼티에 값을 넣을 수 있음
+            - e.g. `val (id, name, pts) = player`
+                ```kotlin
+                // After compilation
+                val id: Int = player.component1()
+                val name: String = player.component2()
+                val pts: Int = player.component3()                
+                ```
+        - 이 position-based destructuring은 아래와 같이 활용할 수 있다
+            ```kotlin
+            val visited = listOf("China", "Russia", "India")
+            val (fist, second, third) = visited
+            println("$first, $second, $third") // China, Russia, India
+            ```
+            ```kotlin
+            val trip = mapOf(
+                "China" to "Tianjin", "Russia" to "Petersburg", "India" to "Rishikesh"
+            )
+            for ((country, city) in trip) {
+                println("We loved $city in $country")
+                // We loved Tianjin in China
+                // We loved Petersburg in Russia
+                // We loved Rishikesh in India
+            }
+            ```
+            ```kotlin
+            val (odd, even) = numbers.partition { it % 2 == 1 }
+            val map = mapOf(1 to "San Francisco", 2 to "Amsterdam")
+            ```
+            - 이 표현식은 유용해보이기도 하지만 헷갈리게도 하니까 적절하게 써라 
+- tuple 대신 data class을 더 활용해보자            
+- `Pair`나 `Triple`도 data class로 구현되어 있다
+- data class를 destructure할 땐, 변수와 인자 이름을 일치시켜 헷갈리지 않도록 하자 
+
+<br/>
+
+## :small_blue_diamond: Item 38: Use function types or functional interfaces to pass operations and actions
+- SAM<sub>single abstract method</sub>은 인터페이스가 하나의 메서드를 갖고 있는 형태
+    - e.g.
+        ```kotlin
+        // SAM
+        interface OnClick {
+            fun onClick(view: View)
+        }
+        ```
+        ```kotlin
+        // OnClick을 인자로 받는 메서드
+        fun setOnClickListener(listener: OnClick) {/* ... */}
+        ```
+        ```kotlin
+        // (실제 사용 시)
+        // 인터페이스를 구현한 오브젝트를 인자로 넘겨줘야함
+        setOnClickListener(object : OnClick {
+            override fun onClick(view: View) {/* ... */}
+        })
+        ```
+- 코틀린은 SAM보다 유용한 아래 매커니즘을 지원한다
+    - function type
+        - e.g. `fun setOnClickListener(listener: (View) -> Unit) {/* ... */}`
+    - functional interface
+- 위 2가지 매커니즘을 사용한다면, 인자는 아래 형태로 정의할 수 있다
+    - lambda expression
+    - anonymous function
+    - function reference or bounded function reference
+    - function type을 구현한 object
+    - functional interface 
+- function type이 복잡하다면, alias를 붙일 수도 있다
+    - e.g. `typealias OnClick = (View) -> Unit`
+    - 타입에 제네릭도 사용 가능
+- functional interface는 자바<sub>또는 다른 언어</sub> 상호 운용성과 좀 복잡한 기능 구현 시 사용하면 좋다?
+
+<br/>
+
+## :small_blue_diamond: Item 39: Use sealed classes and interfaces to express restricted hierarchies
+- 구체적인 계층 구조에선 `sealed class`나 `sealed interface`를 쓰자
+    - 미래에 변경될 수 있다고 하더라도, 현재 계층 구조가 고정되어 있다면!
+- e.g. 
+    ```kotlin
+    sealed class ValueChange<out T>
+    object Keep : ValueChange<Nothing>() // 클래스가 상태값을 갖고 있지 않다면, object로 선언하자! 싱글턴임을 나타내는 modifier
+    object SetDefault : ValueChange<Nothing>()
+    object SetEmpty : ValueChange<Nothing>()
+    class Set<out T>(val value: T) : ValueChange<T>()
+    ```
+- sealed class는 abstract class이고, 아래와 같은 제약 사항을 갖고 있다
+    - sealed class들은 동일한 패키지나 모듈에 선언돼있어야 한다
+        - sealed 라는 modifer를 붙인 녀석들을 제어할 수 있어야 하기 때문. 라이브러리에 있는 sealed를 클라이언트맘대로 제어해버릴 수 없도록,,
+    - local이나 anonymous object로 선언할 수 없다
+        - sealed 클래스에 속한 계층 구조는 제한적이기 때문. 밑에서 사부작사부작 자식을 만들어놓으면 제어하기 어려워서
+- 상속이 필요하다면 `abstract`를, 하위 클래스에 대한 제어가 필요하다면 `sealed`를 쓰자 
+- `when`표현식과 조합이 좋음 
+
+<br/>
+
+## :small_blue_diamond: Item 40: Prefer class hierarchies instead of tagged classes
+- tagged class보다는 `sealed class`등을 사용해 계층 구조로 풀어내자 
+    - 사용되지 않는 변수까지 떠맡아야 할 필요가 없음
+    - 책임이 얽혀있지 않아 깔끔
+
+> 한 클래스 내에서 분기문 같은 걸로 여러 서브 클래스를 생성하거나 관리하는 형태를 tagged라 표현하는 듯
+> - 참고 `item40.TaggedClass.kt`, `item40.SealedClass.kt`
