@@ -1564,6 +1564,7 @@ Restricting overriding
         - `hashCode`는 동일성 체크
     - `copy`
         - 주 생성자의 프로퍼티와 동일한 값을 가지는 객체를 만들어냄. 단 이름있는 인수를 사용하여 다른 값을 입력할 수도 있음
+        - 주 생성자에 없는 데이터는 복사 안됨! 
     - `componentN` <sub>`component1`, `component2`, etc.</sub>
         - `N` 함수로 프로퍼티에 값을 넣을 수 있음
             - e.g. `val (id, name, pts) = player`
@@ -1760,3 +1761,62 @@ Restricting overriding
 > Enum or a sealed class?
 > - enum class는 구체적인 값 집합을, sealed class는 구체적인 클래스의 집합을 나타낸다
 > - 클래스는 object로 선언할 수 있기 때문에, enum 대신 sealed를 쓸 순 있지만, sealed 대신 enum을 쓸 순 없다
+
+<br/>
+
+## :small_blue_diamond: Item 42:  Respect the contract of `equals`
+equality
+- 2가지 종류의 equality가 있다
+    - structural equality
+        - 동등성
+        - `equals`나 `==`<sub>`!=`</sub>으로 체크 가능
+            - e.g. `a == b`, `a.equals(b)`, 만약 a가 nullable하다면 `a?.equals(b) ?: (b === null)`
+    - referential equality
+        - 동일성
+        - `===`<sub>`!==`</sub>로 체크 가능
+    - e.g. 
+        ```kotlin
+        class NameA(val name: String)
+        data class NameB(val name: String)
+
+        fun main() {
+            val name1 = NameA("isoo")
+            val name2 = NameA("isoo")
+            val name1Ref = name1
+
+            println(name1 == name1) // true
+            println(name1 == name2) // false
+            println(name1 == name1Ref) //true
+
+            println(name1 === name1) // true
+            println(name1 === name2) // false
+            println(name1 === name1Ref) // true
+
+            val name3 = NameB("isoo")
+            val name4 = NameB("isoo")
+            val name3Ref = name3
+
+            println(name3 == name3) // true
+            println(name3 == name4) // true
+            println(name3 == name3Ref) // true
+
+            println(name3 === name3) // true
+            println(name3 === name4) // false
+            println(name3 === name3Ref) // true
+        }
+        ```
+- `data class`는 equals를 재정의하고 있는데, 필요에 따라 커스텀하게 쓸 수도 있다 
+    - 커스텀하게 사용할 '동등성' 기준이 있다면, 그에 맞춰 equals를 override 하면됨
+        - 주 생성자에 없는 데이터롤 비교해야한다거나,,
+
+The contract of equals
+- `equal to`가 성립된다는 건, 아래 상황을 만족한다는 뜻 
+    - non-null인 `x`에 대해 `x.equals(x) == true`
+        - `x.equals(null) == false`
+    - non-null인 `x`, `y`에 대해 `x.equals(y) == y.equals(x) == true`
+        - 여러 번 호출해도 동일한 결과여야 함
+    - non-null인 `x`, `y`, `z`에 대해 `x.equals(y) == y.equals(z) == true`이면 `x.equals(z) == true`
+
+<br/>
+
+> 커스텀하게 equals를 만들어내는 건 쉬운 일이 아니니. 웬만하면 주어진 data class를 쓰도록 하자    
