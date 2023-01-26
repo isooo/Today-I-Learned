@@ -1939,3 +1939,221 @@ Implementing `compareTo`
         - e.g. `override fun compareTo(other: T)` 에서 this가 other보다 클 때
     - negative number
         - receiver가 다른 receiver보다 작으면
+
+<br/>
+
+## :small_blue_diamond: Item 45: Consider extracting non-essential parts of your API into extensions
+- memeber로 선언할 것인지, extension으로 선언할 것인가
+    ```kotlin
+    // Defining methods as members
+    class Workshop {
+        fun makeEvent(date: LocalDate) {/* ... */}
+
+        val permalink
+            get() = "/workshop"
+    }
+    ```
+    ```kotlin
+    // Defining methods as extensions
+    class Workshop {/* ... */}
+    fun Workshop.makeEvent(date: LocalDate) {/* ... */}
+
+    val Workshop.permalink
+        get() = "/workshop"
+
+    ```
+- member와 extensioin 차이
+    - extension은 import 해야 한다
+    - member의 우선 순위가 높다
+    - extension은 클래스에 선언한 것이 아닌, 타입에 해당한다
+    - extension은 클래스 참조에 나열되지 않는다
+- extension은 유연함을 제공하지만, 상속이나 annotation processing을 지원하지 않는다. 그래서 호출 시 혼란스러울 수도 있음
+- API에서 필수 요소는 member로 선언하되, 필수 요소가 아닌건 extension으로 추출해보자
+
+<br/>
+
+## :small_blue_diamond: Item 46: Avoid member extensions
+- 가시성을 제한하기 위해 member extension을 하지 말자
+    - 실제론 가시성을 제한하지 않는다!
+        - 클래스 내부에 위치하게 한다고 해서 가시성이 제한되는게 아니라는 뜻 
+    - 필요하다면 멤버로 설정하지 말고, extension 자체의 가시성 제한자를 수정해라 
+
+Why to avoid extension functions
+- <sub>function</sub> reference를 지원하지 않음
+- receiver들의 암묵적인 접근으로 인해, 어떤 게 어떤 값인지 몰라 혼동할 수 있다
+- 직관적이지 않음
+
+Avoid, not prohibit
+- DSL 등에선 member extension이 필요하다. 그러니 무조건 금하지 말고, 꼭 필요한 상황이 아니라면 피하자 
+
+<br/>
+
+## :small_blue_diamond: Item 47: Avoid unnecessary object creation
+- JVM에서는 동일한 문자열을 은 동일 가상 머신 내에선 재사용된다
+    ```kotlin
+    val str1 = "Lorem ipsum dolor sit amet"
+    val str2 = "Lorem ipsum dolor sit amet"
+    print(str1 == str2) // true
+    print(str1 === str2) // true
+    ```
+- Boxed primitives<sub>Integer, Long</sub>도 특정 범위는 재사용된다
+    - e.g. Integer Cache는 -128 에서 127까진 캐싱하고 있다
+        ```kotlin
+        val i1: Int? = 1
+        val i2: Int? = 1
+        println(i1 == i2) // true
+        println(i1 === i2) // true, because i2 was taken from cache
+
+        val j1: Int? = 1234
+        val j2: Int? = 1234
+        println(j1 == j2) // true
+        println(j1 === j2) // false
+        ```
+        - 위 예시는 `Integer`로 컴파일되게 하려고 일부러 nullable한 객체로 만든 것임. nonnull한 Int로 선언하면 `int`로 컴파일됨(primitive `int`는 null일 수 없기 때문)
+
+Is object creation expensive?
+- 객체로 래핑하는데 들어가는 리소스
+    - 객체는 추가적인 고간이 필요하다
+    - 요소가 캡슐화될 때 액세스에는 추가 함수 호출이 필요하다
+    - 객체는 메모리에서 생성 및 할당되어야 하며, 참조도 생성되어야 한다
+
+객체 생성 비용을 줄여보자
+- Object declaration
+    - 객체를 매번 생성하지말고 재활용하는 좋은 예는, singleton으로 사용하는 것이다 
+- Factory function with a cache
+    - 생성자가는 호출될 때마다 새 객체를 생성한다. 팩토리 함수를 이용해 동일한 객체<sub>EmptyList같은..</sub>를 반환하도록 구현해보자 
+- Lazy initialization
+    - 헤비한 클래스를 만들 땐 지연 초기화를 이용해보자 
+- Using primitives
+
+<br/>
+
+## :small_blue_diamond: Item 48: Use the inline modifier for functions with parameters of functional types
+- inline modifier를 쓰면, 컴파일러가 컴파일하면서 이 함수를 본문에 넣어준다 
+    - e.g. `repeat(10) { print(it) }` --> `for (index in 0 until 1-) { print(it) }`
+    - 일반 함수는 함수가 호출되면 해당 함수로 이동해서 로직 수행하는 식이지만, 위 방법은 이와 다르다
+        - 이러한 동작의 장점
+            - A type argument can be reified
+            - Functions with functional parameters are faster when they are inlined
+            - Non-local return is allowed
+
+A type argument can be reified
+- 함수를 inline으로 만들면 함수가 <sub>호출된 부분에서</sub>본문으로 대체되기 때문에, type parameter가 사용된 부분을 reified modifier를 이용해 대체할 수 있다
+- e.g.
+    ```kotlin
+    fun <T> printTypeName() {
+        print(T::class.simpleName) // ERROR: Cannot use 'T' as reified type parameter. Use a class instead.
+    }
+
+    inline fun <reified T> printTypeName() {
+        print(T::class.simpleName)
+    }
+    ```
+    ```kotlin
+    // usage
+    printTypeName<Int>()
+    printTypeName<String>()
+    ```
+    - 컴파일된 코드를 보면, 함수가 호출된 부분이 '함수 본문'으로 대체됐고, type parameter는 인자값으로 대체됨
+    ```java
+    String var1 = Reflection.getOrCreateKotlinClass(Integer.class).getSimpleName();
+    System.out.print(var1);
+
+    var1 = Reflection.getOrCreateKotlinClass(String.class).getSimpleName();
+    System.out.print(var1);
+    ```
+
+Functions with functional parameters are faster when they are inlined
+- function은 inline 될 때 약간 더 빠르다. execution 되고 실행 완료 후 backstack할 때 추적할 필요가 없기 때문
+    - stdlib에 자주 사용되는 작은 함수들이 종종 인라인화되는 이유
+- e.g.
+    ```kotlin
+    // repeat 함수가 repeatNoinline 보다 미세하지만 조금 더 빠름
+    inline fun repeat(times: Int, action: (Int) -> Unit) {
+        for (index in 0 until times) {
+            action(index)
+        }
+    }
+
+    fun repeatNoinline(times: Int, action: (Int) -> Unit) {
+        for (index in 0 until times) {
+            action(index)
+        }
+    }
+    ```
+    - `item47.Avoid unnecessary object creation`를 기억하자. 함수 본문을 객체로 wrapping하면 코드 속도가 더 느려진다
+- 지역 변수는 non-inline lambda에서 직접 사용할 수 없다. 그래서 아래와 같이 사용하면, 컴파일됐을 때 지역 변수`a`가 reference object로 매핑된다
+    ```kotlin
+    var a = 1L
+    repeatNoinline(100_000_000) { a += it }
+    ```
+    ```java
+    final Ref.LongRef a = new Ref.LongRef();
+    a.element = 1L;
+    repeatNoinline(100000000, (Function1)(new Function1() {
+        // $FF: synthetic method
+        // $FF: bridge method
+        public Object invoke(Object var1) {
+        this.invoke(((Number)var1).intValue());
+        return Unit.INSTANCE;
+        }
+
+        public final void invoke(int it) {
+        Ref.LongRef var10000 = a;
+        var10000.element += (long)it;
+        }
+    }));
+    ```
+
+Non-local return is allowed
+```kotlin
+fun main() {
+    repeatNoinline(10) {
+        println(it)
+//        return // ERROR: 'return' is not allowed here
+    }
+
+    repeat(10) {
+        println(it)
+        return
+    }
+}
+```
+- `repeatNoinline`는 코드가 다른 클래스에 있어 `main` 함수 내에선 리턴할 수 없다. 하지만 `repeat`는 가능하다. 컴파일될 때 함수가 `main`에 인라이닝 되기 때문
+    ```java
+    ReifiedTestKt.repeatNoinline(10, (Function1)null.INSTANCE);
+
+    int times$iv = true;
+    int $i$f$repeat = false;
+    byte index$iv = 0;
+    int var5 = false;
+    System.out.println(index$iv);
+    ```
+
+Costs of inline modifiers
+- 인라인 함수는 재귀가 불가능
+- 인라인 함수엔 가시성이 제한된 요소를 사용할 수 없음
+    - private이나 internal 함수/프로퍼티를 public inline 함수에 쓸 수 없음
+- 코드를 거대화시킬수도 있음
+    - 인라인 함수를 호출할 때마다 해당 부분에 본문으로 함수가 인라이닝되므로, 코드가 누적될 수 있음!
+
+Crossinline and noinline
+- 함수를 인라이닝하고 싶지만, 제약사항이 필요할 땐 아래와 같은 modifier를 써보자
+    - `crossinline` 
+        - 함수는 인라이닝되어야 하지만, non-local return을 허용하지 않을 때
+        - 이 함수가 non-local return이 허용되지 않는 다른 스코프<sub>e.g. 인라이닝되지 않는 또다른 lambda</sub>에서 사용될 때 주로 사용
+            - non-local return이 허용되지 않는 컨텍스트에서 인라인 기능을 수행하려고 할 떄,,
+        - e.g.
+            ```kotlin
+            public inline fun <T, R : Comparable<R>> Sequence<T>.sortedBy(crossinline selector: (T) -> R?): Sequence<T> {
+                return sortedWith(compareBy(selector))
+            }
+            ```
+    - `noinline` 
+        - 이 인자는 인라이닝되지 않아야 할 때
+        - 인라이닝되지 않는 다른 함수에 인수로, 이 함수를 사용할 때 주로 사용
+        - e.g.
+            ```kotlin
+            public inline fun CharSequence.replace(regex: Regex, noinline transform: (MatchResult) -> CharSequence): String =
+                regex.replace(this, transform)
+            ```
