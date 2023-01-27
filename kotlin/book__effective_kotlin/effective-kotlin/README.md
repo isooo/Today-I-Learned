@@ -2157,3 +2157,90 @@ Crossinline and noinline
             public inline fun CharSequence.replace(regex: Regex, noinline transform: (MatchResult) -> CharSequence): String =
                 regex.replace(this, transform)
             ```
+
+<br/>
+
+## :small_blue_diamond: Item 49: Consider using inline value classes
+- 함수 뿐만 아니라 '하나의 프로퍼티만을 가진 클래스'도 inline으로 만들 수 있다. 이를 사용하려면 아래와 같이!
+    ```kotlin
+    @JvmInline // 코틀린의 다른 버전(Kotlin/JS, Kotlin/Native)과의 호환성을 위해 선언하는 애너테이션
+    value class Name(private val value: String) { // value modifier를 이용
+        fun greet() {
+            println("Hello, I'm $value")
+        }
+    }
+    ```
+    - 사용하려면
+        ```kotlin
+        val name = Name("ISOO")
+        name.greet()
+        ```
+        - 컴파일된 모습은
+            ```kotlin
+            String name = Name.constructor-impl("ISOO");
+            Name.greet-impl(name);
+            ```
+            - 정적 메서드처럼 표현됨 
+            - 인라인된 `value class`는 성능 오버헤드없이 wrapper 로 만들 수 있다
+                - 위 예시를 보면 `Name.greet-impl()`가 인자로 String을 받는 메서드로 컴파일됨
+                - `value class`를 인자로 받는 곳은, 컴파일될 때 클래스를 받는게 아니라 '`value class`의 하나뿐인 프로퍼티' 타입으로 받게 된다는 것
+                - e.g. `fun acceptNameInlineClass(n: Name) {}`  
+                --(컴파일)--> `public static final void acceptNameInlineClass_(@NotNull String n) {}`
+- `value class` 사용처
+    - To indicate a unit of measure
+        - e.g. `time: Int` 이런 식으로 파라미터를 받으면, 이게 second인지 ms인지 알기 어려움. 물론 파라미터 이름을 명확하게 하는 방법으로 해결할 수도 있지만, 더 좋은 해결 방법은 `value class`를 이용해 효율적이며 좀 더 엄격한 형태로 만드는 것
+            ```kotlin
+            @JvmInline value class Minutes(val minutes: Int) {}
+            @JvmInline value class Millis(val milliseconds: Int) {}
+            interface Timer {
+                fun callAfter(timeMillis: Millis, callback: () -> Unit) 
+                    // 이 함수를 호출할 때, timeMillis에 Millis타입이 들어오지 않으면 Type mismatch Error가 발생하게 만듦
+            }
+            ```            
+    - To use types to protect users from value misuse
+        - e.g.
+            ```kotlin
+            @Entity(name = "grades")
+            class Grades(
+                @Column(name = "studentId")
+                val studentId: Int,
+                @Column(name = "teacherId")
+                val teacherId: Int,
+                ...
+            )
+            ```
+            - 위 유형에서 Int를 더욱 안전한 형태로 쓸려면 아래와 같이
+                ```kotlin
+                @JvmInline
+                value class StudentId(val studentId: Int)
+
+                @JvmInline
+                value class TeacherId(val teacherId: Int)
+
+                @Entity(name = "grades")
+                class Grades(
+                    @Column(name = "studentId")
+                    val studentId: StudentId,
+                    @Column(name = "teacherId")
+                    val teacherId: TeacherId,
+                    ...
+                )
+                ```
+                - 어차피 컴파일될 때 `Int`로 대체되니까,, 
+- 인라이닝되지 않는 상황
+    - `value class`는 implememts interface가 가능하지만, 그럼 인라이닝되는 이점을 누릴 수 없음. 오브젝트가 인터페이스로 사용된다면 인터페이스로 해당 타입을 나타내야 해서 래핑된 객체를 만들기 때문에 인라이닝될 수 없음.         
+    - `value class`를 파라미터로 받을 때, 해당 파라미터가 nullable하다면.. 
+
+> - `value class`는, 타입을 좀 더 엄격하게 관리하여 오남용을 막기 위해 사용되는 듯      
+    
+<br/>
+
+> - type alias를 쓰면 긴 타입을 간결하게 나타낼 수 있지만, 이것이 실제 코드에서 문제점을 더 빨리 찾아낼 수 있는지는 잘 생각해 보고 쓰자..       
+
+<br/>
+
+## :small_blue_diamond: Item 50: Eliminate obsolete object references
+- 더 이상 사용되지 않거나 필요하지 않는 자원은 해제하여 누수를 막자
+- 읽기 힘든 코드는 메모리 누수를 찾기 어렵게 만든다 
+- 캐시를 붙인다면 소프트 참조<sub>soft reference</sub>를 사용하자 
+- 메모리 누수를 막으려면 변수를 로컬 범위<sub>item2: Minimize the scope of variables</sub>에 정의하고, 최상위 수준 속성이나 객체 선언(동반 객체 포함)에 무거운 데이터를 저장하지 않는 것
