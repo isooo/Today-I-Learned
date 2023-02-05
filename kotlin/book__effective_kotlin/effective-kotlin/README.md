@@ -2244,3 +2244,89 @@ Crossinline and noinline
 - 읽기 힘든 코드는 메모리 누수를 찾기 어렵게 만든다 
 - 캐시를 붙인다면 소프트 참조<sub>soft reference</sub>를 사용하자 
 - 메모리 누수를 막으려면 변수를 로컬 범위<sub>item2: Minimize the scope of variables</sub>에 정의하고, 최상위 수준 속성이나 객체 선언(동반 객체 포함)에 무거운 데이터를 저장하지 않는 것
+
+<br/>
+
+## :small_blue_diamond: Item 51: Prefer Sequences for big collections with more than one processing step
+- `Iterable`과 `Sequence`의 차이
+    ```kotlin
+    // iterable
+    public inline fun <T> Iterable<T>.filter(predicate: (T) -> Boolean): List<T> {
+        return filterTo(ArrayList<T>(), predicate)
+    }
+
+    // sequence
+    public fun <T> Sequence<T>.filter(predicate: (T) -> Boolean): Sequence<T> {
+        return FilteringSequence(this, true, predicate)
+    }
+    ```
+    - Iterable은 매 단계에서 <sub>`List`같은</sub> 컬렉션을 반환한다
+    - Sequence는 지연 처리<sub>lazy</sub>하기 때문에 중간 연산을 별도로 계산해두지 않는다. 대신 연산이 끝날 때마다 새로운 시퀀스를 반환한다.  
+        - lazy 이점
+            - natural order를 유지한다
+            - 최소한의 operation을 수행
+            - infinite 가능
+            - 연산마다 컬렉션 생성 안 함
+
+Order is important
+- 작업 순서
+    ```kotlin
+    listOf(1, 2, 3)
+        .filter { print("F$it "); it % 2 == 1 }    // F1 F2 F3 
+        .map { print("M$it "); it * 2 }            // M1 M3 
+        .forEach { print("E$it ") }                // E2 E6 
+
+    sequenceOf(1, 2, 3)
+        .filter { print("F$it "); it % 2 == 1 }    
+        .map { print("M$it "); it * 2 }               
+        .forEach { print("E$it ") }                // F1 M1 E2 F2 F3 M3 E6     
+    ```
+    - Iterable 
+        - 모든 요소를 스텝바이스텝으로 연산에 적용한다<sub>eager order</sub>
+        - e.g. 첫 번째 연산에 모든 요소를 적용하고, 그 다음 연산에 모든 요소를 적용하고...
+    - Sequence
+        - 한 요소를 전체 연산에 적용한다<sub>lazy order</sub>
+        - e.g. 한 요소를 전체 연산에 적용하고, 그 다음 연산을 전체 연산에 적용하고...
+- 위 예시를 만약 classic loop로 나타냈다면, 그 연산 결과는 Sequence와 동일하게 나온다. ~~그러니 시퀀스의 처리 결과가 natural order라고 볼 수 있다~~
+
+Sequences do the minimal number of operations
+- 중간 연산이 있고, find와 같이 먼저 발견되면 연산이 종료되는 경우, 시퀀스를 사용하는 것이 더 효율적일 수 있다. 
+    - 이에 해당하는 종단 연산의 예로는 `first`, `find`, `take`, `any`, `all`, `none`, `indexOf` 등이 있다
+- e.g. 
+    ```kotlin
+    val iterable = (1..10)
+        .filter { print("F$it "); it % 2 == 1 } // F1 F2 F3 F4 F5 F6 F7 F8 F9 F10
+        .map { print("M$it "); it * 2 }            // M1 M3 M5 M7 M9
+        .find { print("D$it "); it > 5 }          // D2 D6
+
+    val sequence = (1..10).asSequence()
+        .filter { print("F$it "); it % 2 == 1 }
+        .map { print("M$it "); it * 2 }
+        .find { print("D$it "); it > 5 }          // F1 M1 D2 F2 F3 M3 D6
+    ```
+    - 종단 연산이 `5 이상인 요소 하나를 찾아라 == find {it > 5}`이므로, lazy로 요소 하나하나를 루프 돌리는게 이득 
+
+Sequences can be infinite
+- `generateSequence`나 `sequence` 등을 이용해 무한 시퀀스를 생성할 수 있다 
+    ```kotlin
+    generateSequence(1) { it + 1 }
+            .map { it * 2 }
+            .take(10)
+            .forEach { print("$it ") } // 2 4 6 8 10 12 14 16 18 20     
+    ```
+- 단, 요소 수를 제한하는 함수를 꼭 넣어줄 것! 안 그럼 무한 반복...
+
+Sequences do not create collections at every processing step
+- 일반적인 컬렉션 처리 기능은, 연산 시 새 컬렉션을 반환한다. 이는 이 단계 이후 곧바로 컬렉션을 사용할 수 있다는 이점은 있지만, 그만큼 비용이 발생함 
+- 컬렉션이 많은 요소를 담고 있다면(혹은 요소들을 담고 있는 컬렉션이 무겁다면) 매 연산마다 새 컬렉션을 생성하지 않도록 시퀀스를 이용하는걸 권장함
+
+When aren’t sequences faster?
+- 컬렉션의 연산에 `sorted`가 포함된 경우, <sub>드물게</sub> 컬렉션보다 시퀀스 처리가 느릴 수도 있음
+
+<br/>
+
+> Java Stream API가 Sequence와 유사하게 lazy하게 동작함. 
+> - 차이점
+>   - Java에선 병렬로 Stream 처리 가능
+> 
+> 병렬처리가 꼭 필요한 경우<sub>병렬 모드에서 연산 수행 시 이득을 얻을 수 있는 처리일 경우</sub>를 제외하곤, Kotlin Stdlib 함수를 이용하자! 
