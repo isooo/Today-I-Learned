@@ -2330,3 +2330,28 @@ When aren’t sequences faster?
 >   - Java에선 병렬로 Stream 처리 가능
 > 
 > 병렬처리가 꼭 필요한 경우<sub>병렬 모드에서 연산 수행 시 이득을 얻을 수 있는 처리일 경우</sub>를 제외하곤, Kotlin Stdlib 함수를 이용하자! 
+
+## :small_blue_diamond: Item 52: Consider associating elements to a map
+- 고유한 key를 가지는 데이터 요소들은 list 대신 map 형태로 저장하는 게 효율적이다
+- 데이터를 수정하거나 반복<sub>iterating</sub>하거나, `filter`, `map`, `flatMap`, `sorted`, `sum` 등등은 map과 list에 큰 차이가 없지만,  
+**find**할 때는 key를 기반으로 찾는 게 훨씬 빠르다
+- `associateBy`를 이용해 식별자 요소를 지정하여 map을 편리하게 만들 수 있다 
+- map의 key가 중복되지 않도록 주의하자
+    - 아래 예시에서 사용된 `associateBy`는, 'If any two elements would have the same key returned by keySelector the last one gets added to the map.'
+    ```kotlin
+    fun main() {
+        val users = listOf(User(1, "Michal"), User(2, "Michal"))
+
+        val byName = users.associateBy { it.name }
+        println(byName) // {Michal=User(id=2, name=Michal)}
+
+        val group: Map<String, List<User>> = users.groupBy { it.name }
+        println(group) // {Michal=[User(id=1, name=Michal), User(id=2, name=Michal)]}
+    }
+
+    data class User(val id: Int, val name: String)
+    ```
+- map에서 list로 변환하려면 `values` 함수를 이용하면 됨
+    - `users.associateBy { it.id }.values`
+- map은, 해당 컬렉션에 자주 access할 때 '성능상 유의미함'을 보여줌. 만약 list에서 map으로 변환해야 하는 작업이 잦다면 되려 시간이 오래 소요될 수 있으니 잘 판단해서 사용할 것! 
+
