@@ -2355,3 +2355,70 @@ When aren’t sequences faster?
     - `users.associateBy { it.id }.values`
 - map은, 해당 컬렉션에 자주 access할 때 '성능상 유의미함'을 보여줌. 만약 list에서 map으로 변환해야 하는 작업이 잦다면 되려 시간이 오래 소요될 수 있으니 잘 판단해서 사용할 것! 
 
+<br/>
+
+## :small_blue_diamond: Item 53: Consider using `groupingBy` instead of `groupBy`
+- 성능이 중요할 땐 `groupBy`보다 `groupingBy`
+- `groupBy`
+    - returns `Map<K, List<V>>`
+    - 편의성과 가독성있는 부분은 장점이지만, 카테고리 별 Collection을 만들어 내는데 시간이 다소 소요됨
+- `groupingBy`
+    - 추가 작업 없이, 지정된 key와 함께 iterable을 wrapping함
+    - returns `Grouping<T, K>`
+    - `groupBy`보다 사용하기 어렵지만, 성능은 좋음
+- e.g. 
+    ```kotlin
+    // 'user 리스트' 기준으로 각 도시의 사용자 수 count
+    val usersCount1: Map<City, Int> = users.groupBy { it.city }
+        .mapValues { (_, users) -> users.size }
+
+    val usersCount2 = users.groupingBy { it.city }
+        .eachCount()
+
+
+    // 'player 리스트' 기준으로 각 팀의 득점 합
+    val pointsPerTeam1: Map<Team, Int> = players.groupBy { it.team }
+        .mapValues { (_, players) ->
+            players.sumOf { it.points }
+        }
+
+    val pointsPerTeam2 = players.groupingBy { it.team }
+        .fold(0) { acc, elem -> acc + elem.points }
+
+
+    // 'format 리스트'을 기준으로 각 퀄리티 별로 가장 적합한 format 찾기
+    val bestFormatPerQuality1: Map<Quality, Resolution> = formats.groupBy { it.quality }
+        .mapValues { (_, formats) ->
+            formats.maxByOrNull { it.resolution }!!
+            // it is fine to use !! here, because
+            // this collection cannot be empty
+        }
+
+    val bestFormatPerQuality2 = formats.groupingBy { it.quality }.reduce { _, acc, elem ->
+        if (acc.resolution > elem.resolution) acc else elem
+    }
+    ```
+    - 중간에 `pointsPerTeam2` 예제는 아래처럼 확장함수로 분리해서 구현할 수도 있음
+        ```kotlin
+        fun <T, K> Grouping<T, K>.eachSumBy(
+            selector: (T) -> Int
+        ): Map<K, Int> = fold(0) { acc, elem -> acc + selector(elem) }
+        ```
+        ```kotlin
+        val pointsPerTeam = players
+            .groupingBy { it.team }
+            .eachSumBy { it.points }
+        ```
+    - 마지막 `bestFormatPerQuality2` 예제도 아래처럼 확장함수로 분리해서 구현할 수도 있음
+        ```kotlin
+        inline fun <T, K> Grouping<T, K>.eachMaxBy(
+            selector: (T) -> Int
+        ): Map<K, T> =
+            reduce { _, acc, elem ->
+                if (selector(acc) > selector(elem)) acc else elem
+            }
+        ```
+        ```kotlin
+        val bestFormatPerQuality = formats.groupingBy { it.quality }
+            .eachMaxBy { it.resolution }
+        ```
