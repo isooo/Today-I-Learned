@@ -2422,3 +2422,32 @@ When aren’t sequences faster?
         val bestFormatPerQuality = formats.groupingBy { it.quality }
             .eachMaxBy { it.resolution }
         ```
+
+<br/>
+
+## :small_blue_diamond: Item 54: Limit the number of operations
+- 컬렉션이나 시퀀스의 element 수가 많다면, operation 수를 줄이는게 비용 절감에 도움된다. 합칠 수 있는 operation은 합치자
+    - 컬렉션에서의 비용
+        - element에 대한 추가적인 iteration
+        - 내부에서 생성되는 새로운 컬렉션
+    - 시퀀스에서의 비용
+        - 시퀀스를 감싼 또 다른 객체
+        - 람다식 생성
+            - operation이 시퀀스 객체로 전달되기 때문에 inlined될 수 없어서 람다 식을 객체로 만들어야 함 
+- e.g.
+    ```kotlin
+    class Student(val name: String?)
+
+    // Works
+    fun List<Student>.getNames1(): List<String> = this.map { it.name }
+        .filter { it != null }
+        .map { it!! }
+
+    // Better
+    fun List<Student>.getNames2(): List<String> = this.map { it.name }
+        .filterNotNull()
+
+    // Best
+    fun List<Student>.getNames3(): List<String> = this.mapNotNull { it.name }
+    ```
+    - `getNames1()`는 연산을 수행하면서 새 컬렉션을 3번 만들어낸다. `getNames2()`와 `getNames3`는 각각 한 번씩만 만들어냄!
