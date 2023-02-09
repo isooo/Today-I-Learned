@@ -2331,6 +2331,8 @@ When aren’t sequences faster?
 > 
 > 병렬처리가 꼭 필요한 경우<sub>병렬 모드에서 연산 수행 시 이득을 얻을 수 있는 처리일 경우</sub>를 제외하곤, Kotlin Stdlib 함수를 이용하자! 
 
+<br/>
+
 ## :small_blue_diamond: Item 52: Consider associating elements to a map
 - 고유한 key를 가지는 데이터 요소들은 list 대신 map 형태로 저장하는 게 효율적이다
 - 데이터를 수정하거나 반복<sub>iterating</sub>하거나, `filter`, `map`, `flatMap`, `sorted`, `sum` 등등은 map과 list에 큰 차이가 없지만,  
@@ -2451,3 +2453,20 @@ When aren’t sequences faster?
     fun List<Student>.getNames3(): List<String> = this.mapNotNull { it.name }
     ```
     - `getNames1()`는 연산을 수행하면서 새 컬렉션을 3번 만들어낸다. `getNames2()`와 `getNames3`는 각각 한 번씩만 만들어냄!
+
+<br/>
+
+## :small_blue_diamond: Item 55: Consider Arrays with primitives for performance-critical processing
+- 코틀린에서 primitive 타입을 선언할 수 없지만, 내부적으로 최적화할 때 사용된다. 
+    - ` Item 47: Avoid unnecessary object creation` 참고
+- primitive 타입은 더 적은 메모리를 차지하고, 더 빠르게 처리된다
+- generic 타입에선 primitive를 사용할 수 없고 래핑된 타입을 사용해야 하지만,  
+성능이 중요한 부분이라면 `IntArray`, `LongArray` 처럼 primitive를 이용한 배열 사용을 고려하자
+    - 엄청나게 많은 element를 가졌고 복잡한 operation이 필요하지 않다면,, ~~읽기 어렵고, 사용이 귀찮은~~ array를 사용해 성능과 메모리에서 이점을 가져갈 수 있겠다 
+
+<br/>
+
+## :small_blue_diamond: Item 56: Consider using mutable collections
+- mutable collection은 immutable collection보다 성능이 더 빠르다는 이점이 있다. 
+    - immutable collection에 요소를 추가하려면 새로운 컬렉션을 만들어 모든 요소를 add해야하니까,, 
+- local scope에서 '컬렉션에 요소 추가' 기능이 사용되고 **불변에 대한 컨트롤이 필요 없는** 경우라면, mutable collection을 이용해 성능 이점을 취해보자 
