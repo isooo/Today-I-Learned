@@ -9,6 +9,7 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
@@ -20,23 +21,31 @@ public class HelloTomcatApplication {
         final ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
         // 필요에 따라 jetty, undertow 등 다른 서버로 교체할 수 있도록,
         // 각 서버팩토리는 WebServerFactory를 구현하고 있다
-        final WebServer webServer = serverFactory.getWebServer(HelloTomcatApplication::addServlet);
+        final WebServer webServer = serverFactory.getWebServer(HelloTomcatApplication::addFrontController);
         webServer.start();
     }
 
-    private static void addServlet(ServletContext servletContext) {
-        // 서블릿 컨테이너에 서블릿을 등록하기 위해 필요한 작업을 해줄 오브젝트를
-        // 파라미터로 전달한다
-        servletContext.addServlet("helloServlet", new HttpServlet() {
+    // 인증, 보안, 다국어, 공통 기능을 처리할 프론트 컨트롤러
+    private static void addFrontController(ServletContext servletContext) {
+                                                            // 서블릿 컨테이너에 서블릿을 등록하기 위해 필요한 작업을 해줄 오브젝트를
+                                                            // 파라미터로 전달한다
+        servletContext.addServlet("FrontController", new HttpServlet() {
             @Override
             protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-                final String name = req.getParameter("name"); // 서블릿 요청을 이용해보자
 
-                // 응답 만들기
-                resp.setStatus(HttpStatus.OK.value()); // 200
-                resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // Content-Type: text/plain
-                resp.getWriter().println("Hello Servlet: " + name); // body
+                if ("/hello".equals(req.getRequestURI()) && HttpMethod.GET.name().equals(req.getMethod())) {
+                    final String name = req.getParameter("name"); // 서블릿 요청을 이용해보자
+
+                    // 응답 만들기
+                    resp.setStatus(HttpStatus.OK.value()); // 200
+                    resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // Content-Type: text/plain
+                    resp.getWriter().println("Hello Servlet: " + name); // body
+                } else if ("/user".equals(req.getRequestURI())) {
+                    //
+                } else {
+                    resp.setStatus(HttpStatus.NOT_FOUND.value());
+                }
             }
-        }).addMapping("/hello"); // hello 라는 요청이 들어오면, 이 'helloServlet'이 처리한다
+        }).addMapping("/*"); // 모든 요청을 이 서블릿이 받을 수 있게!
     }
 }
