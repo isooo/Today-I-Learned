@@ -30,10 +30,12 @@ public class HelloTomcatApplication {
         servletContext.addServlet("helloServlet", new HttpServlet() {
             @Override
             protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+                final String name = req.getParameter("name"); // 서블릿 요청을 이용해보자
+
                 // 응답 만들기
                 resp.setStatus(HttpStatus.OK.value()); // 200
                 resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // Content-Type: text/plain
-                resp.getWriter().println("Hello Servlet"); // body
+                resp.getWriter().println("Hello Servlet: " + name); // body
             }
         }).addMapping("/hello"); // hello 라는 요청이 들어오면, 이 'helloServlet'이 처리한다
     }
