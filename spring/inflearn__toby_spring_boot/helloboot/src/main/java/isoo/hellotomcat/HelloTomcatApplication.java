@@ -24,6 +24,7 @@ public class HelloTomcatApplication {
 
         final GenericApplicationContext applicationContext = new GenericApplicationContext();
         applicationContext.registerBean(HelloController.class); // 컨트롤러를 직접 생성해줘도 되지만, 클래스로 등록해줄 수 있다
+        applicationContext.registerBean(SimpleHelloService.class); // 인터페이스 타입으로 클래스를 생성할 수 없으니, 구현체를 등록
         applicationContext.refresh(); // 등록된 정보들을 바탕으로 컨테이너를 초기화 함(bean 오브젝트들을 만듦)
 
         final HelloController helloController = applicationContext.getBean(HelloController.class);// 타입을 통해, 등록되 bean 오브젝트를 가져옴
