@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,7 +22,11 @@ public class HelloTomcatApplication {
         // 필요에 따라 jetty, undertow 등 다른 서버로 교체할 수 있도록,
         // 각 서버팩토리는 WebServerFactory를 구현하고 있다
 
-        final HelloController helloController = new HelloController();
+        final GenericApplicationContext applicationContext = new GenericApplicationContext();
+        applicationContext.registerBean(HelloController.class); // 컨트롤러를 직접 생성해줘도 되지만, 클래스로 등록해줄 수 있다
+        applicationContext.refresh(); // 등록된 정보들을 바탕으로 컨테이너를 초기화 함(bean 오브젝트들을 만듦)
+
+        final HelloController helloController = applicationContext.getBean(HelloController.class);// 타입을 통해, 등록되 bean 오브젝트를 가져옴
         final WebServer webServer = serverFactory.getWebServer(servletContext -> addFrontController(servletContext, helloController));
         webServer.start();
     }
