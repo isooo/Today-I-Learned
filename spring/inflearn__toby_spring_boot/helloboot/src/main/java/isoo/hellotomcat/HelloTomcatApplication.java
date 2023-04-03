@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,11 +40,8 @@ public class HelloTomcatApplication {
                     final String body = helloController.hello(name);
 
                     // 응답 만들기
-                    resp.setStatus(HttpStatus.OK.value()); // 200
-                    resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // Content-Type: text/plain
+                    resp.setContentType(MediaType.TEXT_PLAIN_VALUE); // Content-Type: text/plain
                     resp.getWriter().println(body);
-                } else if ("/user".equals(req.getRequestURI())) {
-                    //
                 } else {
                     resp.setStatus(HttpStatus.NOT_FOUND.value());
                 }
