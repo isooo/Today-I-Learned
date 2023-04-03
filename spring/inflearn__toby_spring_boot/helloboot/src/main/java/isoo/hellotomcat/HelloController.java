@@ -1,7 +1,10 @@
 package isoo.hellotomcat;
 
+import java.util.Objects;
+
 public class HelloController {
     public String hello(final String name) {
-        return "Hello Servlet: " + name;
+        final SimpleHelloService helloService = new SimpleHelloService();
+        return helloService.sayHello(Objects.requireNonNull(name));
     }
 }
