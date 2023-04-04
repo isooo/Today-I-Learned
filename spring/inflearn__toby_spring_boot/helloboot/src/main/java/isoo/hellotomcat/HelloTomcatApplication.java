@@ -3,13 +3,27 @@ package isoo.hellotomcat;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
-import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
+@Configuration
 public class HelloTomcatApplication {
+
+    @Bean
+    public HelloController helloController(final HelloService helloService) {
+        return new HelloController(helloService);
+    }
+
+    @Bean
+    public HelloService helloService() {
+        return new SimpleHelloService();
+    }
+
     public static void main(String[] args) {
         // 스프링 컨테이너 만들기
-        final GenericWebApplicationContext applicationContext = new GenericWebApplicationContext() {
+        final AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext() {
             @Override
             protected void onRefresh() {
                 super.onRefresh();
@@ -30,8 +44,7 @@ public class HelloTomcatApplication {
             }
         };
 
-        applicationContext.registerBean(HelloController.class); // 컨트롤러를 직접 생성해줘도 되지만, 클래스로 등록해줄 수 있다
-        applicationContext.registerBean(SimpleHelloService.class); // 인터페이스 타입으로 클래스를 생성할 수 없으니, 구현체를 등록
+        applicationContext.register(HelloTomcatApplication.class); // 자바 코드로된 구성 정보를 등록해줌
         applicationContext.refresh(); // 등록된 정보들을 바탕으로 컨테이너를 초기화 함(bean 오브젝트들을 만듦)
     }
 }
