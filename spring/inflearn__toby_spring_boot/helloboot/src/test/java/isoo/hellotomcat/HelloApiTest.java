@@ -20,4 +20,13 @@ class HelloApiTest {
         assertThat(responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE)).startsWith(MediaType.TEXT_PLAIN_VALUE);
         assertThat(responseEntity.getBody()).isEqualTo("Hello Spring");
     }
+
+    @Test
+    void 예외가_발생했을_때_웹_응답의_3가지_요소를_검증한다() {
+        final TestRestTemplate testRestTemplate = new TestRestTemplate();
+        final ResponseEntity<String> responseEntity =
+                testRestTemplate.getForEntity("http://localhost:8080/hello?name=", String.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
