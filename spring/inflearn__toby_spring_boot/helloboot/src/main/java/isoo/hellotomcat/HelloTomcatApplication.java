@@ -3,6 +3,7 @@ package isoo.hellotomcat;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -11,6 +12,15 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Configuration
 @ComponentScan
 public class HelloTomcatApplication {
+    @Bean
+    public ServletWebServerFactory servletWebServerFactory() {
+        return new TomcatServletWebServerFactory();
+    }
+
+    @Bean
+    public DispatcherServlet dispatcherServlet() {
+        return new DispatcherServlet();
+    }
 
     public static void main(String[] args) {
         // 스프링 컨테이너 만들기
@@ -20,14 +30,13 @@ public class HelloTomcatApplication {
                 super.onRefresh();
 
                 // 부트에 내장된 톰캣 서블릿 컨테이너를 만들 수 있는 팩토리 클래스
-                final ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
-                // 필요에 따라 jetty, undertow 등 다른 서버로 교체할 수 있도록,
-                // 각 서버팩토리는 WebServerFactory를 구현하고 있다
+                final ServletWebServerFactory serverFactory = this.getBean(ServletWebServerFactory.class); // 앞서 등록한 TomcatServletWebServerFactory을 가져옴
+                final DispatcherServlet dispatcherServlet = this.getBean(DispatcherServlet.class);
 
                 final WebServer webServer = serverFactory.getWebServer(
                         servletContext -> {
                             servletContext.addServlet(
-                                    "dispatcherServlet", new DispatcherServlet(this)
+                                    "dispatcherServlet", dispatcherServlet
                             ).addMapping("/*"); // 모든 요청을 이 서블릿이 받을 수 있게!
                         }
                 );
