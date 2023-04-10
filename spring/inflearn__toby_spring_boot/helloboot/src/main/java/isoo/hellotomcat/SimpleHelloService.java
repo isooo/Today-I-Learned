@@ -1,8 +1,6 @@
 package isoo.hellotomcat;
 
-import org.springframework.stereotype.Component;
-
-@Component
+@MyComponent
 public class SimpleHelloService implements HelloService {
     @Override
     public String sayHello(final String name) {
