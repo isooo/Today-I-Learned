@@ -1,5 +1,6 @@
 package isoo.hellotomcat;
 
+import isoo.config.MySpringBootApplication;
 import org.springframework.boot.SpringApplication;
 
 @MySpringBootApplication
