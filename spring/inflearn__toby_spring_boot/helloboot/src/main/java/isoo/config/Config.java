@@ -1,4 +1,4 @@
-package isoo.hellotomcat;
+package isoo.config;
 
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;

@@ -1,7 +1,9 @@
 package isoo.hellotomcat;
 
+import isoo.config.Config;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,5 +14,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Configuration
 @ComponentScan
+@Import(Config.class)
 public @interface MySpringBootApplication {
 }
