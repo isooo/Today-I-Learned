@@ -1,2 +1,3 @@
 isoo.config.autoconfig.DispatcherServletConfig
 isoo.config.autoconfig.TomcatWebServerConfig
+isoo.config.autoconfig.JettyWebServerConfig

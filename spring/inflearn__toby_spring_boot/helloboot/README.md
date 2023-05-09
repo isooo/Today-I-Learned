@@ -31,3 +31,7 @@
       
       hello isoo
       ```
+
+# ch7
+- gradle dependency 트리를 터미널에서 보려면
+  - `./gradlew dependencies --configuration compileClasspath`
