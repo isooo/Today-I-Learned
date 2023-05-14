@@ -9,6 +9,11 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ConditionalTest {
@@ -33,7 +38,7 @@ public class ConditionalTest {
     }
 
     @Configuration
-    @Conditional(TrueCondition.class)
+    @TrueConditional
     static class Config1 {
         @Bean
         MyBean myBean() {
@@ -42,7 +47,7 @@ public class ConditionalTest {
     }
 
     @Configuration
-    @Conditional(FalseCondition.class)
+    @FalseConditional
     static class Config2 {
         @Bean
         MyBean myBean() {
@@ -65,5 +70,17 @@ public class ConditionalTest {
         public boolean matches(final ConditionContext context, final AnnotatedTypeMetadata metadata) {
             return false;
         }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @Conditional(TrueCondition.class)
+    @interface TrueConditional {
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @Conditional(FalseCondition.class)
+    @interface FalseConditional {
     }
 }
