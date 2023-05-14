@@ -13,6 +13,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,7 +39,7 @@ public class ConditionalTest {
     }
 
     @Configuration
-    @TrueConditional
+    @BooleanConditional(true)
     static class Config1 {
         @Bean
         MyBean myBean() {
@@ -47,7 +48,7 @@ public class ConditionalTest {
     }
 
     @Configuration
-    @FalseConditional
+    @BooleanConditional(false)
     static class Config2 {
         @Bean
         MyBean myBean() {
@@ -72,6 +73,16 @@ public class ConditionalTest {
         }
     }
 
+    static class BooleanCondition implements Condition {
+        @Override
+        public boolean matches(final ConditionContext context, final AnnotatedTypeMetadata metadata) {
+            final Map<String, Object> annotationAttributes =
+                    metadata.getAnnotationAttributes(BooleanConditional.class.getName());
+            final Boolean value = (Boolean) annotationAttributes.get("value");
+            return value;
+        }
+    }
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     @Conditional(TrueCondition.class)
@@ -82,5 +93,12 @@ public class ConditionalTest {
     @Target(ElementType.TYPE)
     @Conditional(FalseCondition.class)
     @interface FalseConditional {
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @Conditional(BooleanCondition.class)
+    @interface BooleanConditional {
+        boolean value();
     }
 }
